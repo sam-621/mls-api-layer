@@ -36,7 +36,7 @@ export class MlsService {
       return input
         ? ListingAgreement === 'Exclusive Right To Sell' ||
             ListingAgreement === 'Exclusive Agency'
-        : ListingAgreement !== 'Exclusive Right To Lease';
+        : ListingAgreement === 'Exclusive Right To Lease';
     });
   }
 
