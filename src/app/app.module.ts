@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ApiModule } from './api/api.module';
-import { MlsModule } from './mls/mls.module';
+import { ConfigModule } from '@/lib/config';
 
 @Module({
-  imports: [ApiModule],
+  imports: [ConfigModule, ApiModule],
 })
 export class AppModule {}
