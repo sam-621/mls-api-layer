@@ -5,7 +5,7 @@ export class PropertiesDto {
     minLng: string;
     maxLng: string;
   };
-  price: {
+  price?: {
     min: string;
     max: string;
   };
@@ -13,7 +13,7 @@ export class PropertiesDto {
    * If false, is a rental property
    */
   forSale: boolean;
-  beds: number;
-  baths: number;
-  propertyType: string[];
+  beds?: number;
+  baths?: number;
+  propertyType?: string[];
 }

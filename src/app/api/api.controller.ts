@@ -14,6 +14,35 @@ export class ApiController {
     input: PropertiesDto,
   ) {
     const mlsData: MlsAPIResponse = MLS_DATA as any;
-    return this.mlsService.filterByBounds(mlsData.value, input);
+
+    let properties = this.mlsService.filterByBounds(
+      mlsData.value,
+      input.bounds,
+    );
+
+    if (input.price) {
+      properties = this.mlsService.filterByPrice(properties, input.price);
+    }
+
+    if (input.forSale !== undefined) {
+      properties = this.mlsService.filterByForSale(properties, input.forSale);
+    }
+
+    if (input.beds) {
+      properties = this.mlsService.filterByBeds(properties, input.beds);
+    }
+
+    if (input.baths) {
+      properties = this.mlsService.filterByBaths(properties, input.baths);
+    }
+
+    if (input.propertyType) {
+      properties = this.mlsService.filterByPropertyType(
+        properties,
+        input.propertyType,
+      );
+    }
+
+    return properties;
   }
 }
