@@ -1,40 +1,19 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 
 import * as MLS_DATA from '../data.json';
 import { MlsAPIResponse } from '../mls/mls.type';
-
-class Dto {
-  minLat: string;
-  maxLat: string;
-  minLng: string;
-  maxLng: string;
-}
+import { PropertiesDto } from './api.dto';
+import { MlsService } from '../mls/mls.service';
 
 @Controller()
 export class ApiController {
+  constructor(private readonly mlsService: MlsService) {}
   @Post('properties')
   getProperties(
     @Body()
-    input: Dto,
+    input: PropertiesDto,
   ) {
-    const { minLat, maxLat, minLng, maxLng } = input;
-    console.log({ input });
-
     const mlsData: MlsAPIResponse = MLS_DATA as any;
-
-    const filteredProperties = mlsData.value.filter((property) => {
-      const { Latitude, Longitude } = property;
-
-      return (
-        Latitude >= parseFloat(minLat) &&
-        Latitude <= parseFloat(maxLat) &&
-        Longitude >= parseFloat(minLng) &&
-        Longitude <= parseFloat(maxLng)
-      );
-    });
-
-    console.log({ filteredProperties });
-
-    return filteredProperties;
+    return this.mlsService.filterByBounds(mlsData.value, input);
   }
 }
