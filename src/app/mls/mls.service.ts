@@ -22,6 +22,22 @@ export class MlsService {
   filterByPrice(values: Value[], input: PropertiesDto['price']): Value[] {
     const { min, max } = input;
 
+    if (!min) {
+      return values.filter((property) => {
+        const { ListPrice } = property;
+
+        return ListPrice <= parseFloat(max);
+      });
+    }
+
+    if (!max) {
+      return values.filter((property) => {
+        const { ListPrice } = property;
+
+        return ListPrice >= parseFloat(min);
+      });
+    }
+
     return values.filter((property) => {
       const { ListPrice } = property;
 
