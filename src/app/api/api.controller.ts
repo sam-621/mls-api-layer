@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
 import * as MLS_DATA from '../data.json';
 import { MlsAPIResponse } from '../mls/mls.type';
@@ -44,5 +44,12 @@ export class ApiController {
     }
 
     return properties;
+  }
+
+  @Get('properties/:id')
+  getPropertyById(@Param() params: { id: string }) {
+    const mlsData: MlsAPIResponse = MLS_DATA as any;
+
+    return mlsData.value.find((property) => property.ListingId === params.id);
   }
 }
