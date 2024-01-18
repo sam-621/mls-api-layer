@@ -1,14 +1,14 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 
 import * as MLS_DATA from '../data.json';
 import { MlsAPIResponse } from '../mls/mls.type';
-import { PropertiesDto } from './api.dto';
+import { PropertiesDto, SearchCriteriaDto } from './api.dto';
 import { MlsService } from '../mls/mls.service';
 
-@Controller()
+@Controller('/properties')
 export class ApiController {
   constructor(private readonly mlsService: MlsService) {}
-  @Post('properties')
+  @Post()
   getProperties(
     @Body()
     input: PropertiesDto,
@@ -46,10 +46,27 @@ export class ApiController {
     return properties;
   }
 
-  @Get('properties/:id')
+  @Get('/:id')
   getPropertyById(@Param() params: { id: string }) {
     const mlsData: MlsAPIResponse = MLS_DATA as any;
 
     return mlsData.value.find((property) => property.ListingId === params.id);
+  }
+
+  @Get('/search')
+  search(@Query() params: SearchCriteriaDto) {
+    const mlsData: MlsAPIResponse = MLS_DATA as any;
+
+    const result = this.mlsService.searchByCriteria(mlsData.value, params);
+
+    return result.map((p) => ({
+      id: p.ListingId,
+      address: p.UnparsedAddress,
+      city: p.City,
+      cp: p.PostalCode,
+      listingPrice: p.ListPrice,
+      isLease: p.ListingAgreement === 'Exclusive Right To Lease',
+      image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
+    }));
   }
 }

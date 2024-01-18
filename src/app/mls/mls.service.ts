@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Value } from './mls.type';
-import { PropertiesDto } from '../api/api.dto';
+import { PropertiesDto, SearchCriteria } from '../api/api.dto';
 
 @Injectable()
 export class MlsService {
@@ -80,6 +80,20 @@ export class MlsService {
       const { PropertyType } = property;
 
       return input.includes(PropertyType);
+    });
+  }
+
+  searchByCriteria(values: Value[], input: SearchCriteria) {
+    const { address, city, cp } = input;
+
+    return values.filter((property) => {
+      const { UnparsedAddress, City, PostalCode } = property;
+
+      return (
+        UnparsedAddress.includes(address) ||
+        City.includes(city) ||
+        PostalCode.includes(cp)
+      );
     });
   }
 }

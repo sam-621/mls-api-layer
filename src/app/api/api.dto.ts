@@ -17,3 +17,9 @@ export class PropertiesDto {
   baths?: number;
   propertyType?: string[];
 }
+
+export class SearchCriteriaDto {
+  address: string;
+  city: string;
+  cp: string;
+}
