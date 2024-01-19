@@ -50,12 +50,6 @@ export class ApiController {
     }
 
     const { skip, take } = input.pagination;
-    console.log({
-      skip,
-      take,
-      p: properties.length,
-      news: properties.slice(skip, skip + take),
-    });
 
     return {
       total: properties.length,
