@@ -4,6 +4,12 @@ import * as MLS_DATA from '../data.json';
 import { MlsAPIResponse } from '../mls/mls.type';
 import { PropertiesDto, SearchCriteriaDto } from './api.dto';
 import { MlsService } from '../mls/mls.service';
+import {
+  ListingPropertiesResponse,
+  MapPropertiesResponse,
+  PropertiesResponse,
+} from './api.types';
+import { skip } from 'rxjs';
 
 @Controller('/properties')
 export class ApiController {
@@ -12,7 +18,7 @@ export class ApiController {
   getProperties(
     @Body()
     input: PropertiesDto,
-  ) {
+  ): PropertiesResponse {
     const mlsData: MlsAPIResponse = MLS_DATA as any;
 
     let properties = this.mlsService.filterByBounds(
@@ -43,7 +49,40 @@ export class ApiController {
       );
     }
 
-    return properties;
+    const { skip, take } = input.pagination;
+
+    return {
+      listing: properties.slice(skip, take).map((p) => ({
+        id: p.ListingKey,
+        price: p.ListPrice,
+        image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
+        squareFt: p.LotSizeSquareFeet,
+        beds: p.BedroomsTotal,
+        baths: p.BathroomsTotalInteger,
+        address: {
+          name: p.UnparsedAddress,
+          city: p.City,
+          stateOrdProvince: p.StateOrProvince,
+          pc: p.PostalCode,
+        },
+        status: p.MFR_PreviousStatus as ListingPropertiesResponse['status'],
+      })),
+      map: properties.map((p) => ({
+        id: p.ListingKey,
+        price: p.ListPrice,
+        image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
+        squareFt: p.LotSizeSquareFeet,
+        address: {
+          name: p.UnparsedAddress,
+          city: p.City,
+          stateOrdProvince: p.StateOrProvince,
+          pc: p.PostalCode,
+        },
+        latitude: p.Latitude,
+        longitude: p.Longitude,
+        status: p.MFR_PreviousStatus as MapPropertiesResponse['status'],
+      })),
+    };
   }
 
   @Get('/unique/:id')

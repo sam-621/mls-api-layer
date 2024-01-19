@@ -16,6 +16,10 @@ export class PropertiesDto {
   beds?: number;
   baths?: number;
   propertyType?: string[];
+  pagination: {
+    take: number;
+    skip: number;
+  };
 }
 
 export class SearchCriteriaDto {
