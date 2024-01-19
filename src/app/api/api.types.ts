@@ -1,4 +1,5 @@
 export type PropertiesResponse = {
+  total: number;
   listing: ListingPropertiesResponse[];
   map: MapPropertiesResponse[];
 };

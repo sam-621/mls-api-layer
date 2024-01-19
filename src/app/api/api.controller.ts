@@ -50,23 +50,32 @@ export class ApiController {
     }
 
     const { skip, take } = input.pagination;
+    console.log({
+      skip,
+      take,
+      p: properties.length,
+      news: properties.slice(skip, skip + take),
+    });
 
     return {
-      listing: properties.slice(skip, take).map((p) => ({
-        id: p.ListingKey,
-        price: p.ListPrice,
-        image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-        squareFt: p.LotSizeSquareFeet,
-        beds: p.BedroomsTotal,
-        baths: p.BathroomsTotalInteger,
-        address: {
-          name: p.UnparsedAddress,
-          city: p.City,
-          stateOrdProvince: p.StateOrProvince,
-          pc: p.PostalCode,
-        },
-        status: p.MFR_PreviousStatus as ListingPropertiesResponse['status'],
-      })),
+      total: properties.length,
+      listing: properties
+        .slice(Number(skip), Number(skip) + Number(take))
+        .map((p) => ({
+          id: p.ListingKey,
+          price: p.ListPrice,
+          image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
+          squareFt: p.LotSizeSquareFeet,
+          beds: p.BedroomsTotal,
+          baths: p.BathroomsTotalInteger,
+          address: {
+            name: p.UnparsedAddress,
+            city: p.City,
+            stateOrdProvince: p.StateOrProvince,
+            pc: p.PostalCode,
+          },
+          status: p.MFR_PreviousStatus as ListingPropertiesResponse['status'],
+        })),
       map: properties.map((p) => ({
         id: p.ListingKey,
         price: p.ListPrice,
