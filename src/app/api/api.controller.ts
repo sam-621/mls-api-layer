@@ -46,7 +46,7 @@ export class ApiController {
     return properties;
   }
 
-  @Get('/:id')
+  @Get('/unique/:id')
   getPropertyById(@Param() params: { id: string }) {
     const mlsData: MlsAPIResponse = MLS_DATA as any;
 
@@ -60,7 +60,7 @@ export class ApiController {
     const result = this.mlsService.searchByCriteria(mlsData.value, params);
 
     return result.map((p) => ({
-      id: p.ListingId,
+      id: p.ListingKey,
       address: p.UnparsedAddress,
       city: p.City,
       cp: p.PostalCode,

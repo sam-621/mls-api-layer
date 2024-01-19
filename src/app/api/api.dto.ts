@@ -22,4 +22,5 @@ export class SearchCriteriaDto {
   address: string;
   city: string;
   cp: string;
+  limit: number;
 }
