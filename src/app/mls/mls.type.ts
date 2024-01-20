@@ -4,6 +4,8 @@ export interface MlsAPIResponse {
   '@odata.nextLink': string;
 }
 
+export type PropertyStatus = 'Active' | 'Pending' | 'Under Contract' | 'Sold';
+
 export interface Value {
   '@odata.id': string;
   AdditionalParcelsYN?: boolean;

@@ -9,7 +9,6 @@ import {
   MapPropertiesResponse,
   PropertiesResponse,
 } from './api.types';
-import { skip } from 'rxjs';
 
 @Controller('/properties')
 export class ApiController {
@@ -49,6 +48,62 @@ export class ApiController {
       );
     }
 
+    if (input.squareFeet) {
+      properties = this.mlsService.filterBySquareFeet(
+        properties,
+        input.squareFeet,
+      );
+    }
+
+    if (input.yearBuilt) {
+      properties = this.mlsService.filterByYearBuilt(
+        properties,
+        input.yearBuilt,
+      );
+    }
+
+    if (input.lotSize) {
+      properties = this.mlsService.filterByLotSize(properties, input.lotSize);
+    }
+
+    if (input.status) {
+      properties = this.mlsService.filterByStatus(properties, input.status);
+    }
+
+    if (input.garageSpaces) {
+      properties = this.mlsService.filterByGarageSpaces(
+        properties,
+        input.garageSpaces,
+      );
+    }
+
+    if (input.stories) {
+      properties = this.mlsService.filterByStories(properties, input.stories);
+    }
+
+    if (input.hasAssociation !== undefined) {
+      properties = this.mlsService.filterByHasAssociation(
+        properties,
+        input.hasAssociation,
+      );
+    }
+
+    if (input.hasPool) {
+      properties = this.mlsService.filterByHasPool(properties);
+    }
+
+    if (input.hasWaterfront) {
+      properties = this.mlsService.filterByHasWaterfront(properties);
+    }
+
+    if (input.hasAC) {
+      properties = this.mlsService.filterByHasAC(properties);
+    }
+
+    if (input.hasHeater) {
+      properties = this.mlsService.filterByHasHeater(properties);
+    }
+
     const { skip, take } = input.pagination;
 
     return {
@@ -59,7 +114,7 @@ export class ApiController {
           id: p.ListingKey,
           price: p.ListPrice,
           image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-          squareFt: p.LotSizeSquareFeet,
+          squareFt: p.LivingArea,
           beds: p.BedroomsTotal,
           baths: p.BathroomsTotalInteger,
           address: {
@@ -74,7 +129,7 @@ export class ApiController {
         id: p.ListingKey,
         price: p.ListPrice,
         image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-        squareFt: p.LotSizeSquareFeet,
+        squareFt: p.LivingArea,
         address: {
           name: p.UnparsedAddress,
           city: p.City,

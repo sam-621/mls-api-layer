@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Value } from './mls.type';
 import { PropertiesDto, SearchCriteriaDto } from '../api/api.dto';
+import { MapPropertiesResponse } from '../api/api.types';
 
 @Injectable()
 export class MlsService {
@@ -99,5 +100,161 @@ export class MlsService {
         );
       })
       .slice(0, input.limit);
+  }
+
+  filterBySquareFeet(
+    values: Value[],
+    input: PropertiesDto['squareFeet'],
+  ): Value[] {
+    const { min, max } = input;
+
+    if (!min) {
+      return values.filter((property) => {
+        const { LivingArea } = property;
+
+        return LivingArea <= max;
+      });
+    }
+
+    if (!max) {
+      return values.filter((property) => {
+        const { LivingArea } = property;
+
+        return LivingArea >= min;
+      });
+    }
+
+    return values.filter((property) => {
+      const { LivingArea } = property;
+
+      return LivingArea >= min && LivingArea <= max;
+    });
+  }
+
+  filterByLotSize(values: Value[], input: PropertiesDto['lotSize']): Value[] {
+    const { min, max } = input;
+
+    if (!min) {
+      return values.filter((property) => {
+        const { LotSizeSquareFeet } = property;
+
+        return LotSizeSquareFeet <= max;
+      });
+    }
+
+    if (!max) {
+      return values.filter((property) => {
+        const { LotSizeSquareFeet } = property;
+
+        return LotSizeSquareFeet >= min;
+      });
+    }
+
+    return values.filter((property) => {
+      const { LotSizeSquareFeet } = property;
+
+      return LotSizeSquareFeet >= min && LotSizeSquareFeet <= max;
+    });
+  }
+
+  filterByYearBuilt(
+    values: Value[],
+    input: PropertiesDto['yearBuilt'],
+  ): Value[] {
+    const { min, max } = input;
+
+    if (!min) {
+      return values.filter((property) => {
+        const { YearBuilt } = property;
+
+        return YearBuilt <= max;
+      });
+    }
+
+    if (!max) {
+      return values.filter((property) => {
+        const { YearBuilt } = property;
+
+        return YearBuilt >= min;
+      });
+    }
+
+    return values.filter((property) => {
+      const { YearBuilt } = property;
+
+      return YearBuilt >= min && YearBuilt <= max;
+    });
+  }
+
+  filterByStatus(values: Value[], input: PropertiesDto['status']): Value[] {
+    return values.filter((property) => {
+      const { MFR_PreviousStatus } = property;
+
+      return input.includes(
+        MFR_PreviousStatus as MapPropertiesResponse['status'],
+      );
+    });
+  }
+
+  filterByGarageSpaces(
+    values: Value[],
+    input: PropertiesDto['garageSpaces'],
+  ): Value[] {
+    return values.filter((property) => {
+      const { GarageSpaces } = property;
+
+      return GarageSpaces >= input;
+    });
+  }
+
+  filterByStories(values: Value[], input: PropertiesDto['stories']): Value[] {
+    return values.filter((property) => {
+      const { StoriesTotal } = property;
+
+      return StoriesTotal >= input;
+    });
+  }
+
+  filterByHasAssociation(
+    values: Value[],
+    input: PropertiesDto['hasAssociation'],
+  ): Value[] {
+    return values.filter((property) => {
+      const { AssociationYN } = property;
+
+      return AssociationYN === input;
+    });
+  }
+
+  filterByHasPool(values: Value[]): Value[] {
+    return values.filter((property) => {
+      const { PoolPrivateYN } = property;
+
+      return !!PoolPrivateYN;
+    });
+  }
+
+  filterByHasWaterfront(values: Value[]): Value[] {
+    return values.filter((property) => {
+      const { WaterfrontYN } = property;
+
+      return !!WaterfrontYN;
+    });
+  }
+
+  filterByHasAC(values: Value[]): Value[] {
+    return values.filter((property) => {
+      const { Cooling } = property;
+
+      return !!Cooling;
+    });
+  }
+
+  filterByHasHeater(values: Value[]): Value[] {
+    return values.filter((property) => {
+      const { Heating } = property;
+
+      return !!Heating;
+    });
   }
 }

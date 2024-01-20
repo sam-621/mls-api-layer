@@ -1,3 +1,5 @@
+import { PropertyStatus } from '../mls/mls.type';
+
 export class PropertiesDto {
   bounds: {
     minLat: string;
@@ -20,6 +22,26 @@ export class PropertiesDto {
     take: number;
     skip: number;
   };
+  squareFeet?: {
+    min: number;
+    max: number;
+  };
+  lotSize?: {
+    min: number;
+    max: number;
+  };
+  yearBuilt?: {
+    min: number;
+    max: number;
+  };
+  status?: PropertyStatus[];
+  garageSpaces?: number;
+  stories?: number;
+  hasAssociation?: boolean;
+  hasPool?: boolean;
+  hasWaterfront?: boolean;
+  hasAC?: boolean;
+  hasHeater?: boolean;
 }
 
 export class SearchCriteriaDto {
