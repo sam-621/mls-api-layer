@@ -104,6 +104,13 @@ export class ApiController {
       properties = this.mlsService.filterByHasHeater(properties);
     }
 
+    if (input.description) {
+      properties = this.mlsService.filterByDescription(
+        properties,
+        input.description,
+      );
+    }
+
     const { skip, take } = input.pagination;
 
     return {
@@ -164,7 +171,6 @@ export class ApiController {
       listingPrice: p.ListPrice,
       isLease: p.ListingAgreement === 'Exclusive Right To Lease',
       image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-      description: p.PublicRemarks,
     }));
   }
 }

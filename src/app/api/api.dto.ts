@@ -42,10 +42,10 @@ export class PropertiesDto {
   hasWaterfront?: boolean;
   hasAC?: boolean;
   hasHeater?: boolean;
+  description?: string;
 }
 
 export class SearchCriteriaDto {
-  description: string;
   address: string;
   city: string;
   cp: string;

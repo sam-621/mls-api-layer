@@ -85,21 +85,10 @@ export class MlsService {
   }
 
   searchByCriteria(values: Value[], input: SearchCriteriaDto) {
-    const { address, city, cp, description } = input;
+    const { address, city, cp } = input;
 
     // we can return an empty array because this method is used in another endpoint
-    if (!address && !city && !cp && !description) return [];
-
-    // if we have a description, we don't need to filter by address, city or cp because the client filter logic
-    if (description) {
-      return values
-        .filter((property) => {
-          const { PublicRemarks } = property;
-
-          return PublicRemarks.toLowerCase().includes(description);
-        })
-        .slice(0, input.limit);
-    }
+    if (!address && !city && !cp) return [];
 
     return values
       .filter((property) => {
@@ -270,5 +259,14 @@ export class MlsService {
     });
   }
 
-  filterByD;
+  filterByDescription(
+    values: Value[],
+    input: PropertiesDto['description'],
+  ): Value[] {
+    return values.filter((property) => {
+      const { PublicRemarks } = property;
+
+      return PublicRemarks.toLowerCase().includes(input);
+    });
+  }
 }
