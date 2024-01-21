@@ -1,18 +1,22 @@
 import { HttpService } from '@nestjs/axios';
 import { writeFile } from 'fs/promises';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, Interval } from '@nestjs/schedule';
 import { firstValueFrom } from 'rxjs';
 import { MlsAPIResponse, Value } from '../mls/mls.type';
 import * as path from 'path';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {}
 
   // @Cron('45 * * * * *')
-  // @Interval(20000)
+  @Interval(20000)
   async handleCron() {
     try {
       console.log('\n');
@@ -33,14 +37,15 @@ export class TasksService {
 
   private async getProperties() {
     let data: Value[] = [];
-    let currentNextLink =
-      'https://api-demo.mlsgrid.com/v2/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27%20and%20MlgCanView%20eq%20true&$expand=Media,Rooms,UnitTypes';
+    let currentNextLink = this.configService.get<string>(
+      'MLS_INITIAL_ENDPOINT',
+    );
 
     while (currentNextLink !== undefined) {
       const response = await firstValueFrom(
         this.httpService.get<MlsAPIResponse>(currentNextLink, {
           headers: {
-            Authorization: 'Bearer d2798b340ac104796196ec227904fb34e09b54af',
+            Authorization: `Bearer ${this.configService.get('MLS_TOKEN')} `,
           },
         }),
       );
