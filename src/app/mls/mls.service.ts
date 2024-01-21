@@ -85,18 +85,20 @@ export class MlsService {
   }
 
   searchByCriteria(values: Value[], input: SearchCriteriaDto) {
-    const { address, city, cp } = input;
+    const { address, city, cp, description } = input;
 
-    if (!address && !city && !cp) return [];
+    // we can return an empty array because this method is used in another endpoint
+    if (!address && !city && !cp && !description) return [];
 
     return values
       .filter((property) => {
-        const { UnparsedAddress, City, PostalCode } = property;
+        const { UnparsedAddress, City, PostalCode, PublicRemarks } = property;
 
         return (
           UnparsedAddress.toLowerCase().includes(address) ||
           City.toLowerCase().includes(city) ||
-          PostalCode.toLowerCase().includes(cp)
+          PostalCode.toLowerCase().includes(cp) ||
+          PublicRemarks.toLowerCase().includes(description)
         );
       })
       .slice(0, input.limit);
@@ -257,4 +259,6 @@ export class MlsService {
       return !!Heating;
     });
   }
+
+  filterByD;
 }

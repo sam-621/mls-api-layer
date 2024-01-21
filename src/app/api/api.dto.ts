@@ -45,6 +45,7 @@ export class PropertiesDto {
 }
 
 export class SearchCriteriaDto {
+  description: string;
   address: string;
   city: string;
   cp: string;
