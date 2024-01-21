@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { writeFile } from 'fs/promises';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, Interval } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { firstValueFrom } from 'rxjs';
 import { MlsAPIResponse, Value } from '../mls/mls.type';
 import * as path from 'path';
@@ -15,8 +15,8 @@ export class TasksService {
     private readonly configService: ConfigService,
   ) {}
 
-  // @Cron('45 * * * * *')
-  @Interval(20000)
+  // Run every Friday at 12am
+  @Cron('0 0 * * 5')
   async handleCron() {
     try {
       console.log('\n');
