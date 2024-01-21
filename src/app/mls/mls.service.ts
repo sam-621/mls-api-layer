@@ -90,15 +90,25 @@ export class MlsService {
     // we can return an empty array because this method is used in another endpoint
     if (!address && !city && !cp && !description) return [];
 
+    // if we have a description, we don't need to filter by address, city or cp because the client filter logic
+    if (description) {
+      return values
+        .filter((property) => {
+          const { PublicRemarks } = property;
+
+          return PublicRemarks.toLowerCase().includes(description);
+        })
+        .slice(0, input.limit);
+    }
+
     return values
       .filter((property) => {
-        const { UnparsedAddress, City, PostalCode, PublicRemarks } = property;
+        const { UnparsedAddress, City, PostalCode } = property;
 
         return (
           UnparsedAddress.toLowerCase().includes(address) ||
           City.toLowerCase().includes(city) ||
-          PostalCode.toLowerCase().includes(cp) ||
-          PublicRemarks.toLowerCase().includes(description)
+          PostalCode.toLowerCase().includes(cp)
         );
       })
       .slice(0, input.limit);

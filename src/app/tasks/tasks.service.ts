@@ -11,7 +11,7 @@ export class TasksService {
   private readonly logger = new Logger(TasksService.name);
   constructor(private readonly httpService: HttpService) {}
 
-  @Cron('45 * * * * *')
+  // @Cron('45 * * * * *')
   // @Interval(20000)
   async handleCron() {
     try {

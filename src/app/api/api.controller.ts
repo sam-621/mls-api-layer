@@ -164,6 +164,7 @@ export class ApiController {
       listingPrice: p.ListPrice,
       isLease: p.ListingAgreement === 'Exclusive Right To Lease',
       image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
+      description: p.PublicRemarks,
     }));
   }
 }
