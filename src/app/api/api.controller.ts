@@ -151,10 +151,16 @@ export class ApiController {
   }
 
   @Get('/unique/:id')
-  getPropertyById(@Param() params: { id: string }) {
+  async getPropertyById(@Param() params: { id: string }) {
     const mlsData: MlsAPIResponse = MLS_DATA as any;
+    console.log({ params });
 
-    return mlsData.value.find((property) => property.ListingId === params.id);
+    const result = mlsData.value.find(
+      (property) => property.ListingKey === params.id,
+    );
+    console.log({ result });
+
+    return result;
   }
 
   @Get('/search')
