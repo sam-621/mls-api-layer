@@ -130,6 +130,9 @@ export class ApiController {
             stateOrdProvince: p.StateOrProvince,
             pc: p.PostalCode,
           },
+          isForSale:
+            p.ListingAgreement === 'Exclusive Right To Sell' ||
+            p.ListingAgreement === 'Exclusive Agency',
           status: p.MFR_PreviousStatus as ListingPropertiesResponse['status'],
         })),
       map: properties.map((p) => ({
