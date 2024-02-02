@@ -119,11 +119,11 @@ export class ApiController {
         .slice(Number(skip), Number(skip) + Number(take))
         .map((p) => ({
           id: p.ListingKey,
-          price: p.ListPrice,
+          price: p.ListPrice ?? 0,
           image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-          squareFt: p.LivingArea,
-          beds: p.BedroomsTotal,
-          baths: p.BathroomsTotalInteger,
+          squareFt: p.LivingArea ?? 0,
+          beds: p.BedroomsTotal ?? 0,
+          baths: p.BathroomsTotalInteger ?? 0,
           address: {
             name: p.UnparsedAddress,
             city: p.City,
@@ -137,9 +137,9 @@ export class ApiController {
         })),
       map: properties.map((p) => ({
         id: p.ListingKey,
-        price: p.ListPrice,
+        price: p.ListPrice ?? 0,
         image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-        squareFt: p.LivingArea,
+        squareFt: p.LivingArea ?? 0,
         address: {
           name: p.UnparsedAddress,
           city: p.City,
@@ -149,6 +149,9 @@ export class ApiController {
         latitude: p.Latitude,
         longitude: p.Longitude,
         status: p.MFR_PreviousStatus as MapPropertiesResponse['status'],
+        isForSale:
+          p.ListingAgreement === 'Exclusive Right To Sell' ||
+          p.ListingAgreement === 'Exclusive Agency',
       })),
     };
   }
