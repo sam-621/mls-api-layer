@@ -111,24 +111,27 @@ export class MlsService {
 
     if (!min) {
       return values.filter((property) => {
-        const { LivingArea } = property;
+        const { BuildingAreaTotal, LotSizeSquareFeet } = property;
 
-        return LivingArea <= max;
+        return (BuildingAreaTotal || LotSizeSquareFeet) <= max;
       });
     }
 
     if (!max) {
       return values.filter((property) => {
-        const { LivingArea } = property;
+        const { BuildingAreaTotal, LotSizeSquareFeet } = property;
 
-        return LivingArea >= min;
+        return (BuildingAreaTotal || LotSizeSquareFeet) >= min;
       });
     }
 
     return values.filter((property) => {
-      const { LivingArea } = property;
+      const { BuildingAreaTotal, LotSizeSquareFeet } = property;
 
-      return LivingArea >= min && LivingArea <= max;
+      return (
+        (BuildingAreaTotal || LotSizeSquareFeet) >= min &&
+        (BuildingAreaTotal || LotSizeSquareFeet) <= max
+      );
     });
   }
 
