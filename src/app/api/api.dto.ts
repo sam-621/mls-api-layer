@@ -1,4 +1,4 @@
-import { PropertyStatus } from '../mls/mls.type';
+import { ListingOrder, PropertyStatus } from '../mls/mls.type';
 
 export class PropertiesDto {
   bounds: {
@@ -34,6 +34,7 @@ export class PropertiesDto {
     min: number;
     max: number;
   };
+  order?: ListingOrder;
   status?: PropertyStatus[];
   garageSpaces?: number;
   stories?: number;

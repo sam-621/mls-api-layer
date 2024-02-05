@@ -111,6 +111,10 @@ export class ApiController {
       );
     }
 
+    if (input.order) {
+      properties = this.mlsService.orderBy(properties, input.order);
+    }
+
     const { skip, take } = input.pagination;
 
     return {
@@ -121,7 +125,7 @@ export class ApiController {
           id: p.ListingKey,
           price: p.ListPrice ?? 0,
           image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-          squareFt: p?.BuildingAreaTotal || p?.LotSizeSquareFeet,
+          squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
           beds: p.BedroomsTotal ?? 0,
           baths: p.BathroomsTotalInteger ?? 0,
           address: {
@@ -139,7 +143,7 @@ export class ApiController {
         id: p.ListingKey,
         price: p.ListPrice ?? 0,
         image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-        squareFt: p?.BuildingAreaTotal || p?.LotSizeSquareFeet,
+        squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
         address: {
           name: p.UnparsedAddress,
           city: p.City,

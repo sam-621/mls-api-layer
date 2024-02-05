@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Value } from './mls.type';
+import { ListingOrder, Value } from './mls.type';
 import { PropertiesDto, SearchCriteriaDto } from '../api/api.dto';
 import { MapPropertiesResponse } from '../api/api.types';
 
@@ -271,5 +271,39 @@ export class MlsService {
 
       return PublicRemarks.toLowerCase().includes(input);
     });
+  }
+
+  orderBy(values: Value[], order: ListingOrder) {
+    if (order === ListingOrder.HIGHEST_PRICE) {
+      return values.sort((a, b) => b.ListPrice - a.ListPrice);
+    }
+
+    if (order === ListingOrder.LOWEST_PRICE) {
+      return values.sort((a, b) => a.ListPrice - b.ListPrice);
+    }
+
+    if (order === ListingOrder.NEWEST) {
+      return values.sort(
+        (a, b) =>
+          new Date(b.ListingContractDate).getTime() -
+          new Date(a.ListingContractDate).getTime(),
+      );
+    }
+
+    if (order === ListingOrder.OLDEST) {
+      return values.sort(
+        (a, b) =>
+          new Date(a.ListingContractDate).getTime() -
+          new Date(b.ListingContractDate).getTime(),
+      );
+    }
+
+    if (order === ListingOrder.SQUARE_FEET) {
+      return values.sort(
+        (a, b) =>
+          (b.BuildingAreaTotal || b.LotSizeSquareFeet) -
+          (a.BuildingAreaTotal || a.LotSizeSquareFeet),
+      );
+    }
   }
 }

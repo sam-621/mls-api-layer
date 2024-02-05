@@ -6,6 +6,14 @@ export interface MlsAPIResponse {
 
 export type PropertyStatus = 'Active' | 'Pending' | 'Under Contract' | 'Sold';
 
+export enum ListingOrder {
+  HIGHEST_PRICE = 1,
+  LOWEST_PRICE = 2,
+  NEWEST = 3,
+  OLDEST = 4,
+  SQUARE_FEET = 5,
+}
+
 export interface Value {
   '@odata.id': string;
   AdditionalParcelsYN?: boolean;
