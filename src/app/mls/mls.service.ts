@@ -95,9 +95,9 @@ export class MlsService {
         const { UnparsedAddress, City, PostalCode } = property;
 
         return (
-          UnparsedAddress.toLowerCase().includes(address) ||
-          City.toLowerCase().includes(city) ||
-          PostalCode.toLowerCase().includes(cp)
+          UnparsedAddress.toLowerCase().includes(address.toLowerCase()) ||
+          City.toLowerCase().includes(city.toLowerCase()) ||
+          PostalCode.toLowerCase().includes(cp.toLowerCase())
         );
       })
       .slice(0, input.limit);

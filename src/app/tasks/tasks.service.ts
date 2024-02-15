@@ -17,6 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   @Cron('0 0 * * 5')
+  // @Cron(CronExpression.EVERY_30_MINUTES)
   async handleCron() {
     try {
       console.log('\n');
@@ -52,6 +53,7 @@ export class TasksService {
 
       data = [...data, ...response.data.value];
       currentNextLink = response.data['@odata.nextLink'];
+      console.log('currentNextLink', currentNextLink);
     }
 
     await writeFile(
