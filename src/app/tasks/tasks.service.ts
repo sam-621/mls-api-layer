@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { writeFile } from 'fs/promises';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { firstValueFrom } from 'rxjs';
 import { MlsAPIResponse, Value } from '../mls/mls.type';
 import * as path from 'path';
@@ -16,8 +16,8 @@ export class TasksService {
   ) {}
 
   // Run every Friday at 12am
-  @Cron('0 0 * * 5')
-  // @Cron(CronExpression.EVERY_30_MINUTES)
+  // @Cron('0 0 * * 5')
+  @Cron(CronExpression.EVERY_DAY_AT_4PM)
   async handleCron() {
     try {
       console.log('\n');
@@ -37,7 +37,7 @@ export class TasksService {
   }
 
   private async getProperties() {
-    let data: Value[] = [];
+    // let data: Value[] = [];
     let currentNextLink = this.configService.get<string>(
       'MLS_INITIAL_ENDPOINT',
     );
@@ -51,17 +51,18 @@ export class TasksService {
         }),
       );
 
-      data = [...data, ...response.data.value];
+      // data = [...data, ...response.data.value];
       currentNextLink = response.data['@odata.nextLink'];
       console.log('currentNextLink', currentNextLink);
     }
 
-    await writeFile(
-      path.join(process.cwd(), 'src/app', 'data.json'),
-      JSON.stringify({ value: data }),
-      'utf8',
-    );
+    // await writeFile(
+    //   path.join(process.cwd(), 'src/app', 'data.json'),
+    //   JSON.stringify({ value: data }),
+    //   'utf8',
+    // );
 
-    this.logger.log(`Done! ${data.length} properties saved.`);
+    // this.logger.log(`Done! ${data.length} properties saved.`);
+    this.logger.log(`Done! hi properties saved.`);
   }
 }

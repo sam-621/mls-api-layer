@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Property {
+  id                String   @id @default(uuid())
+  price             Int
+  squareFt          Int
+  beds              Int
+  baths             Int
+  isForSale         Boolean
+  status            String
+  latitude          Float
+  longitude         Float
+  propertyType      String   @map("property_type")
+  mlsId             String   @map("mls_id")
+  listedAt          DateTime @map("listed_at")
+  updatedAt         DateTime @map("updated_at")
+  description       String
+  cooling           Boolean
+  heating           Boolean
+  city              String
+  pc                String
+  address           String
+  stateOrProvince   String   @map("state_or_province")
+  garageSpaces      Int      @map("garage_spaces")
+  lotSize           Int      @map("lot_size")
+  yearBuilt         Int      @map("year_built")
+  stories           Int
+  hasAssociationFee Boolean  @map("has_association_fee")
+  hasWaterfront     Boolean  @map("has_waterfront")
+
+  Media Media[]
+}
+
+model Media {
+  id    String @id @default(uuid())
+  url   String
+  order Int
+
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+}
