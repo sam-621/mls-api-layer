@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { MlsAPIResponse, Value } from '../mls/mls.type';
 import * as path from 'path';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../persistance/prisma.service';
 
 @Injectable()
 export class TasksService {
@@ -13,11 +14,12 @@ export class TasksService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron(CronExpression.EVERY_DAY_AT_4PM)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     try {
       console.log('\n');
@@ -52,6 +54,38 @@ export class TasksService {
       );
 
       // data = [...data, ...response.data.value];
+      const properties = response.data.value;
+      await this.prisma.property.createMany({
+        data: properties.map((p) => ({
+          address: p.UnparsedAddress,
+          city: p.City,
+          baths: p.BathroomsTotalInteger ?? 0,
+          beds: p.BedroomsTotal ?? 0,
+          price: p.ListPrice ?? 0,
+          description: p.PublicRemarks,
+          garageSpaces: p.GarageSpaces ?? 0,
+          latitude: p.Latitude ?? 0,
+          longitude: p.Longitude ?? 0,
+          hasAssociationFee: p.AssociationYN ?? false,
+          hasWaterfront: p.WaterfrontYN ?? false,
+          isForSale:
+            p.ListingAgreement === 'Exclusive Right To Sell' ||
+            p.ListingAgreement === 'Exclusive Agency',
+          listedAt: p.OriginalEntryTimestamp,
+          mlsId: p.ListingKey,
+          pc: p.PostalCode,
+          propertyType: p.PropertyType,
+          squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
+          status: p.MFR_PreviousStatus ?? '',
+          stateOrProvince: p.StateOrProvince,
+          stories: p.StoriesTotal ?? 0,
+          lotSize: p.LotSizeAcres ?? 0,
+          updatedAt: p.ModificationTimestamp,
+          yearBuilt: p.YearBuilt ?? 0,
+          cooling: !!p.Cooling,
+          heating: !!p.Heating,
+        })),
+      });
       currentNextLink = response.data['@odata.nextLink'];
       console.log('currentNextLink', currentNextLink);
     }
