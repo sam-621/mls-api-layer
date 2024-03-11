@@ -1,7 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 
-import * as MLS_DATA from '../data.json';
-import { MlsAPIResponse } from '../mls/mls.type';
 import { PropertiesDto, SearchCriteriaDto } from './api.dto';
 import { MlsService } from '../mls/mls.service';
 import { ListingPropertiesResponse, PropertiesResponse } from './api.types';
