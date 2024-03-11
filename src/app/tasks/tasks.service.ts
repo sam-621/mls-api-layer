@@ -1,10 +1,8 @@
 import { HttpService } from '@nestjs/axios';
-import { writeFile } from 'fs/promises';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { firstValueFrom } from 'rxjs';
-import { MlsAPIResponse, Value } from '../mls/mls.type';
-import * as path from 'path';
+import { MlsAPIResponse } from '../mls/mls.type';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../persistance/prisma.service';
 
@@ -18,8 +16,8 @@ export class TasksService {
   ) {}
 
   // Run every Friday at 12am
-  // @Cron('0 0 * * 5')
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron('0 0 * * 5')
+  // @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCron() {
     try {
       console.log('\n');
@@ -32,9 +30,9 @@ export class TasksService {
       this.logger.log('Fetching properties corn job Ended successfully');
       console.timeEnd('properties-cron-job');
     } catch (error) {
-      this.logger.log('Fetching properties corn job Ended with error');
+      this.logger.error('Fetching properties corn job Ended with error');
       this.logger.error(error);
-      console.timeEnd('properties-cron-job');
+      // console.timeEnd('properties-cron-job');
     }
   }
 
@@ -43,6 +41,8 @@ export class TasksService {
     let currentNextLink = this.configService.get<string>(
       'MLS_INITIAL_ENDPOINT',
     );
+    await this.prisma.media.deleteMany({});
+    await this.prisma.property.deleteMany({});
 
     while (currentNextLink !== undefined) {
       const response = await firstValueFrom(
@@ -53,50 +53,83 @@ export class TasksService {
         }),
       );
 
-      // data = [...data, ...response.data.value];
       const properties = response.data.value;
-      await this.prisma.property.createMany({
-        data: properties.map((p) => ({
-          address: p.UnparsedAddress,
-          city: p.City,
-          baths: p.BathroomsTotalInteger ?? 0,
-          beds: p.BedroomsTotal ?? 0,
-          price: p.ListPrice ?? 0,
-          description: p.PublicRemarks,
-          garageSpaces: p.GarageSpaces ?? 0,
-          latitude: p.Latitude ?? 0,
-          longitude: p.Longitude ?? 0,
-          hasAssociationFee: p.AssociationYN ?? false,
-          hasWaterfront: p.WaterfrontYN ?? false,
-          isForSale:
-            p.ListingAgreement === 'Exclusive Right To Sell' ||
-            p.ListingAgreement === 'Exclusive Agency',
-          listedAt: p.OriginalEntryTimestamp,
-          mlsId: p.ListingKey,
-          pc: p.PostalCode,
-          propertyType: p.PropertyType,
-          squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
-          status: p.MFR_PreviousStatus ?? '',
-          stateOrProvince: p.StateOrProvince,
-          stories: p.StoriesTotal ?? 0,
-          lotSize: p.LotSizeAcres ?? 0,
-          updatedAt: p.ModificationTimestamp,
-          yearBuilt: p.YearBuilt ?? 0,
-          cooling: !!p.Cooling,
-          heating: !!p.Heating,
-        })),
+      console.log(properties.length);
+
+      const promises = properties.map((p) => {
+        const promise = this.prisma.property.create({
+          data: {
+            Media: {
+              createMany: {
+                data:
+                  p.Media?.map((m) => ({
+                    url: m.MediaURL,
+                    order: m.Order,
+                  })) ?? [],
+              },
+            },
+            address: p.UnparsedAddress,
+            city: p.City,
+            baths: p.BathroomsTotalInteger ?? 0,
+            beds: p.BedroomsTotal ?? 0,
+            price: p.ListPrice ?? 0,
+            description: p.PublicRemarks,
+            garageSpaces: p.GarageSpaces ?? 0,
+            latitude: p.Latitude ?? 0,
+            longitude: p.Longitude ?? 0,
+            hasAssociationFee: p.AssociationYN ?? false,
+            hasWaterfront: p.WaterfrontYN ?? false,
+            isForSale:
+              p.ListingAgreement === 'Exclusive Right To Sell' ||
+              p.ListingAgreement === 'Exclusive Agency',
+            listedAt: p.OriginalEntryTimestamp,
+            mlsId: p.ListingKey,
+            pc: p.PostalCode,
+            propertyType: p.PropertyType,
+            squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
+            listAgentMlsId: p.ListAgentMlsId,
+            areaName: p.MLSAreaMajor ?? '',
+            buyerAgencyCompensation: p.BuyerAgencyCompensation ?? '',
+            contractDate: p.ListingContractDate,
+            county: p.CountyOrParish ?? '',
+            daysOnMarket: p.DaysOnMarket ?? 0,
+            floorDescription: p.Rooms?.length
+              ? p.Rooms[0].MFR_RoomFlooring
+              : '',
+            lotSize: p.LotSizeAcres ?? 0,
+            roof: p.Roof ?? [],
+            sewer: p.Sewer ?? [],
+            stateOrProvince: p.StateOrProvince,
+            status: p.MFR_PreviousStatus ?? '',
+            title: p.StreetName ?? '',
+            stories: p.StoriesTotal ?? 0,
+            hasPool: p.PoolPrivateYN ?? false,
+            updatedAt: p.ModificationTimestamp,
+            yearBuilt: p.YearBuilt ?? 0,
+            cooling: !!p.Cooling,
+            heating: !!p.Heating,
+            waterSource: p.WaterSource ?? [],
+            appliances: p.Appliances ?? [],
+            associationAmenities: p.AssociationAmenities ?? [],
+            exteriorFeatures: p.ExteriorFeatures ?? [],
+            firePlace: p.FireplaceYN ?? false,
+            garage: p.GarageYN ?? false,
+            interiorFeatures: p.InteriorFeatures ?? [],
+            poolFeatures: p.PoolFeatures ?? [],
+            parkingFeatures: p.ParkingFeatures ?? [],
+            view: p.View ?? [],
+          },
+        });
+
+        return promise;
       });
+
+      await this.prisma.$transaction(promises);
+
       currentNextLink = response.data['@odata.nextLink'];
       console.log('currentNextLink', currentNextLink);
     }
 
-    // await writeFile(
-    //   path.join(process.cwd(), 'src/app', 'data.json'),
-    //   JSON.stringify({ value: data }),
-    //   'utf8',
-    // );
-
-    // this.logger.log(`Done! ${data.length} properties saved.`);
     this.logger.log(`Done! hi properties saved.`);
   }
 }

@@ -14,32 +14,53 @@ datasource db {
 }
 
 model Property {
-  id                String   @id @default(uuid())
-  price             Int
-  squareFt          Int
-  beds              Int
-  baths             Int
-  isForSale         Boolean
-  status            String
-  latitude          Float
-  longitude         Float
-  propertyType      String   @map("property_type")
-  mlsId             String   @map("mls_id")
-  listedAt          DateTime @map("listed_at")
-  updatedAt         DateTime @map("updated_at")
-  description       String
-  cooling           Boolean
-  heating           Boolean
-  city              String
-  pc                String
-  address           String
-  stateOrProvince   String   @map("state_or_province")
-  garageSpaces      Int      @map("garage_spaces")
-  lotSize           Int      @map("lot_size")
-  yearBuilt         Int      @map("year_built")
-  stories           Int
-  hasAssociationFee Boolean  @map("has_association_fee")
-  hasWaterfront     Boolean  @map("has_waterfront")
+  id                      String   @id @default(uuid())
+  title                   String
+  listAgentMlsId          String   @map("list_agent_mls_id")
+  interiorFeatures        String[] @map("interior_features")
+  appliances              String[]
+  floorDescription        String   @default("") @map("floor_description")
+  firePlace               Boolean  @default(false) @map("fire_place")
+  exteriorFeatures        String[] @map("exterior_features")
+  roof                    String[]
+  sewer                   String[]
+  areaName                String   @map("area_name")
+  daysOnMarket            Int      @map("days_on_market")
+  associationAmenities    String[] @map("association_amenities")
+  garage                  Boolean  @default(false)
+  parkingFeatures         String[] @map("parking_features")
+  view                    String[]
+  county                  String
+  waterSource             String[] @map("water_source")
+  poolFeatures            String[] @map("pool_features")
+  buyerAgencyCompensation String   @map("buyer_agency_compensation")
+  price                   Int
+  squareFt                Int
+  beds                    Int
+  baths                   Int
+  isForSale               Boolean  @default(false)
+  status                  String
+  latitude                Float
+  longitude               Float
+  propertyType            String   @map("property_type")
+  mlsId                   String   @map("mls_id")
+  listedAt                DateTime @map("listed_at")
+  updatedAt               DateTime @map("updated_at")
+  description             String
+  cooling                 Boolean  @default(false)
+  heating                 Boolean  @default(false)
+  city                    String
+  pc                      String
+  address                 String
+  stateOrProvince         String   @map("state_or_province")
+  garageSpaces            Int      @map("garage_spaces")
+  lotSize                 Int      @map("lot_size")
+  yearBuilt               Int      @map("year_built")
+  stories                 Int
+  hasAssociationFee       Boolean  @default(false) @map("has_association_fee")
+  hasWaterfront           Boolean  @default(false) @map("has_waterfront")
+  hasPool                 Boolean  @default(false) @map("has_pool")
+  contractDate            String   @map("contract_date")
 
   Media Media[]
 }

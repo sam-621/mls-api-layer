@@ -4,189 +4,169 @@ import * as MLS_DATA from '../data.json';
 import { MlsAPIResponse } from '../mls/mls.type';
 import { PropertiesDto, SearchCriteriaDto } from './api.dto';
 import { MlsService } from '../mls/mls.service';
-import {
-  ListingPropertiesResponse,
-  MapPropertiesResponse,
-  PropertiesResponse,
-} from './api.types';
+import { ListingPropertiesResponse, PropertiesResponse } from './api.types';
+import { PrismaService } from '../persistance/prisma.service';
 
 @Controller('/properties')
 export class ApiController {
-  constructor(private readonly mlsService: MlsService) {}
+  constructor(
+    private readonly mlsService: MlsService,
+    private readonly prismaService: PrismaService,
+  ) {}
+
   @Post()
-  getProperties(
+  async getProperties(
     @Body()
     input: PropertiesDto,
-  ): PropertiesResponse {
-    const mlsData: MlsAPIResponse = MLS_DATA as any;
-
-    let properties = this.mlsService.filterByBounds(
-      mlsData.value,
-      input.bounds,
-    );
-
-    if (input.price) {
-      properties = this.mlsService.filterByPrice(properties, input.price);
-    }
-
-    if (input.forSale !== undefined) {
-      properties = this.mlsService.filterByForSale(properties, input.forSale);
-    }
-
-    if (input.beds) {
-      properties = this.mlsService.filterByBeds(properties, input.beds);
-    }
-
-    if (input.baths) {
-      properties = this.mlsService.filterByBaths(properties, input.baths);
-    }
-
-    if (input.propertyType) {
-      properties = this.mlsService.filterByPropertyType(
-        properties,
-        input.propertyType,
-      );
-    }
-
-    if (input.squareFeet) {
-      properties = this.mlsService.filterBySquareFeet(
-        properties,
-        input.squareFeet,
-      );
-    }
-
-    if (input.yearBuilt) {
-      properties = this.mlsService.filterByYearBuilt(
-        properties,
-        input.yearBuilt,
-      );
-    }
-
-    if (input.lotSize) {
-      properties = this.mlsService.filterByLotSize(properties, input.lotSize);
-    }
-
-    if (input.status) {
-      properties = this.mlsService.filterByStatus(properties, input.status);
-    }
-
-    if (input.garageSpaces) {
-      properties = this.mlsService.filterByGarageSpaces(
-        properties,
-        input.garageSpaces,
-      );
-    }
-
-    if (input.stories) {
-      properties = this.mlsService.filterByStories(properties, input.stories);
-    }
-
-    if (input.hasAssociation !== undefined) {
-      properties = this.mlsService.filterByHasAssociation(
-        properties,
-        input.hasAssociation,
-      );
-    }
-
-    if (input.hasPool) {
-      properties = this.mlsService.filterByHasPool(properties);
-    }
-
-    if (input.hasWaterfront) {
-      properties = this.mlsService.filterByHasWaterfront(properties);
-    }
-
-    if (input.hasAC) {
-      properties = this.mlsService.filterByHasAC(properties);
-    }
-
-    if (input.hasHeater) {
-      properties = this.mlsService.filterByHasHeater(properties);
-    }
-
-    if (input.description) {
-      properties = this.mlsService.filterByDescription(
-        properties,
-        input.description,
-      );
-    }
+  ): Promise<PropertiesResponse> {
+    let data = await this.prismaService.property.findMany({
+      where: {
+        longitude: {
+          gte: parseFloat(input.bounds.minLng),
+          lte: parseFloat(input.bounds.maxLng),
+        },
+        latitude: {
+          gte: parseFloat(input.bounds.minLat),
+          lte: parseFloat(input.bounds.maxLat),
+        },
+        price: {
+          gte: input?.price?.min ? parseInt(input?.price?.min) : undefined,
+          lte: input?.price?.max ? parseInt(input?.price?.max) : undefined,
+        },
+        isForSale: input.forSale ?? true,
+        beds: input.beds ?? undefined,
+        baths: input.baths ?? undefined,
+        propertyType: {
+          in: input.propertyType,
+        },
+        squareFt: {
+          gte: input.squareFeet?.min ? input.squareFeet.min : undefined,
+          lte: input.squareFeet?.max ? input.squareFeet.max : undefined,
+        },
+        yearBuilt: {
+          gte: input.yearBuilt?.min ? input.yearBuilt.min : undefined,
+          lte: input.yearBuilt?.max ? input.yearBuilt.max : undefined,
+        },
+        lotSize: {
+          gte: input.lotSize?.min ? input.lotSize.min : undefined,
+          lte: input.lotSize?.max ? input.lotSize.max : undefined,
+        },
+        status: {
+          in: input.status,
+        },
+        garageSpaces: input.garageSpaces ?? undefined,
+        stories: input.stories ?? undefined,
+        hasAssociationFee: input.hasAssociation ?? undefined,
+        hasPool: input.hasPool ?? undefined,
+        hasWaterfront: input.hasWaterfront ?? undefined,
+        cooling: input.hasAC ?? undefined,
+        heating: input.hasHeater ?? undefined,
+        description: {
+          contains: input.description,
+        },
+      },
+      include: {
+        Media: true,
+      },
+    });
 
     if (input.order) {
-      properties = this.mlsService.orderBy(properties, input.order);
+      data = this.mlsService.orderBy(data, input.order);
     }
 
     const { skip, take } = input.pagination;
 
     return {
-      total: properties.length,
-      listing: properties
+      total: data.length,
+      listing: data
         .slice(Number(skip), Number(skip) + Number(take))
         .map((p) => ({
-          id: p.ListingKey,
-          price: p.ListPrice ?? 0,
-          image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-          squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
-          beds: p.BedroomsTotal ?? 0,
-          baths: p.BathroomsTotalInteger ?? 0,
+          id: p.mlsId,
+          price: p.price ?? 0,
+          image: p.Media[0].url,
+          squareFt: p.squareFt ?? 0,
+          beds: p.beds ?? 0,
+          baths: p.baths ?? 0,
           address: {
-            name: p.UnparsedAddress,
-            city: p.City,
-            stateOrdProvince: p.StateOrProvince,
-            pc: p.PostalCode,
+            name: p.address,
+            city: p.city,
+            stateOrdProvince: p.stateOrProvince,
+            pc: p.pc,
           },
-          isForSale:
-            p.ListingAgreement === 'Exclusive Right To Sell' ||
-            p.ListingAgreement === 'Exclusive Agency',
-          status: p.MFR_PreviousStatus as ListingPropertiesResponse['status'],
+          isForSale: p.isForSale,
+          status: p.status as ListingPropertiesResponse['status'],
         })),
-      map: properties.map((p) => ({
-        id: p.ListingKey,
-        price: p.ListPrice ?? 0,
-        image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
-        squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
+      map: data.map((p) => ({
+        id: p.mlsId,
+        price: p.price ?? 0,
+        image: '',
+        squareFt: p.squareFt ?? 0,
         address: {
-          name: p.UnparsedAddress,
-          city: p.City,
-          stateOrdProvince: p.StateOrProvince,
-          pc: p.PostalCode,
+          name: p.address,
+          city: p.city,
+          stateOrdProvince: p.stateOrProvince,
+          pc: p.pc,
         },
-        beds: p.BedroomsTotal ?? 0,
-        baths: p.BathroomsTotalInteger ?? 0,
-        latitude: p.Latitude,
-        longitude: p.Longitude,
-        status: p.MFR_PreviousStatus as MapPropertiesResponse['status'],
-        isForSale:
-          p.ListingAgreement === 'Exclusive Right To Sell' ||
-          p.ListingAgreement === 'Exclusive Agency',
+        beds: p.beds ?? 0,
+        baths: p.baths ?? 0,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        status: p.status as ListingPropertiesResponse['status'],
+        isForSale: p.isForSale,
       })),
     };
   }
 
   @Get('/unique/:id')
   async getPropertyById(@Param() params: { id: string }) {
-    const mlsData: MlsAPIResponse = MLS_DATA as any;
+    const property = await this.prismaService.property.findFirstOrThrow({
+      where: {
+        mlsId: params.id,
+      },
+      include: {
+        Media: true,
+      },
+    });
 
-    const result = mlsData.value.find(
-      (property) => property.ListingKey === params.id,
-    );
-
-    return result;
+    return property;
   }
 
   @Get('/search')
-  search(@Query() params: SearchCriteriaDto) {
-    const mlsData: MlsAPIResponse = MLS_DATA as any;
+  async search(@Query() params: SearchCriteriaDto) {
+    const data = await this.prismaService.property.findMany({
+      where: {
+        OR: [
+          {
+            address: {
+              contains: params.address,
+            },
+          },
+          {
+            city: {
+              contains: params.city,
+            },
+          },
+          {
+            pc: {
+              contains: params.cp,
+            },
+          },
+        ],
+      },
+      include: {
+        Media: true,
+      },
+      take: parseInt(params.limit as unknown as string),
+    });
 
-    const result = this.mlsService.searchByCriteria(mlsData.value, params);
-
-    return result.map((p) => ({
-      id: p.ListingKey,
-      address: p.UnparsedAddress,
-      city: p.City,
-      cp: p.PostalCode,
-      listingPrice: p.ListPrice,
-      isLease: p.ListingAgreement === 'Exclusive Right To Lease',
-      image: Array.isArray(p.Media) ? p.Media[0]?.MediaURL : '',
+    return data.map((p) => ({
+      id: p.mlsId,
+      address: p.address,
+      city: p.city,
+      cp: p.pc,
+      listingPrice: p.price,
+      isLease: p.isForSale,
+      image: Array.isArray(p.Media) ? p.Media[0]?.url : '',
     }));
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ListingOrder, Value } from './mls.type';
 import { PropertiesDto, SearchCriteriaDto } from '../api/api.dto';
 import { MapPropertiesResponse } from '../api/api.types';
+import { Media, Property } from '@prisma/client';
 
 @Injectable()
 export class MlsService {
@@ -273,37 +274,33 @@ export class MlsService {
     });
   }
 
-  orderBy(values: Value[], order: ListingOrder) {
+  orderBy(values: (Property & { Media: Media[] })[], order: ListingOrder) {
     if (order === ListingOrder.HIGHEST_PRICE) {
-      return values.sort((a, b) => b.ListPrice - a.ListPrice);
+      return values.sort((a, b) => b.price - a.price);
     }
 
     if (order === ListingOrder.LOWEST_PRICE) {
-      return values.sort((a, b) => a.ListPrice - b.ListPrice);
+      return values.sort((a, b) => a.price - b.price);
     }
 
     if (order === ListingOrder.NEWEST) {
       return values.sort(
         (a, b) =>
-          new Date(b.ListingContractDate).getTime() -
-          new Date(a.ListingContractDate).getTime(),
+          new Date(b.contractDate).getTime() -
+          new Date(a.contractDate).getTime(),
       );
     }
 
     if (order === ListingOrder.OLDEST) {
       return values.sort(
         (a, b) =>
-          new Date(a.ListingContractDate).getTime() -
-          new Date(b.ListingContractDate).getTime(),
+          new Date(a.contractDate).getTime() -
+          new Date(b.contractDate).getTime(),
       );
     }
 
     if (order === ListingOrder.SQUARE_FEET) {
-      return values.sort(
-        (a, b) =>
-          (b.BuildingAreaTotal || b.LotSizeSquareFeet) -
-          (a.BuildingAreaTotal || a.LotSizeSquareFeet),
-      );
+      return values.sort((a, b) => b.squareFt - a.squareFt);
     }
   }
 }

@@ -53,7 +53,7 @@ export interface Value {
   ListAgentPager?: string;
   ListAOR: TAor;
   ListingAgreement?: ListingAgreement;
-  ListingContractDate: Date;
+  ListingContractDate: string;
   ListingId: string;
   ListingKey: string;
   OriginatingSystemKey: string;
@@ -1012,7 +1012,7 @@ export enum Feature {
   Heated = 'Heated',
   InGround = 'In Ground',
   Indoor = 'Indoor',
-  Infinity = 'Infinity',
+  _Infinity = 'Infinity',
   Lighting = 'Lighting',
   Other = 'Other',
   OutsideBathAccess = 'Outside Bath Access',
