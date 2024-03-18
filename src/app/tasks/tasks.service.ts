@@ -39,7 +39,7 @@ export class TasksService {
   private async getProperties() {
     // let data: Value[] = [];
     //2020-12-30T23:59:59.99Z
-    const count = 0;
+    let count = 0;
     const LIMIT = 50;
 
     const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
@@ -52,6 +52,10 @@ export class TasksService {
     await this.prisma.property.deleteMany({});
 
     while (currentNextLink !== undefined) {
+      if (count === LIMIT) {
+        break;
+      }
+
       const response = await firstValueFrom(
         this.httpService.get<MlsAPIResponse>(currentNextLink, {
           headers: {
@@ -135,6 +139,7 @@ export class TasksService {
 
       currentNextLink = response.data['@odata.nextLink'];
       console.log('currentNextLink', currentNextLink);
+      count++;
     }
 
     this.logger.log(`Done! hi properties saved.`);
