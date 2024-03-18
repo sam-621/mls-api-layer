@@ -16,8 +16,8 @@ export class TasksService {
   ) {}
 
   // Run every Friday at 12am
-  @Cron('0 0 * * 5')
-  // @Cron(CronExpression.EVERY_10_MINUTES)
+  // @Cron('0 0 * * 5')
+  @Cron(CronExpression.EVERY_DAY_AT_5PM)
   async handleCron() {
     try {
       console.log('\n');
@@ -38,9 +38,16 @@ export class TasksService {
 
   private async getProperties() {
     // let data: Value[] = [];
-    let currentNextLink = this.configService.get<string>(
-      'MLS_INITIAL_ENDPOINT',
-    );
+    //2020-12-30T23:59:59.99Z
+    const count = 0;
+    const LIMIT = 50;
+
+    const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
+    const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%202024-03-15T05:21:00.008Z`;
+    let currentNextLink =
+      MLS_DOMAIN +
+      `/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27%20and%20MlgCanView%20eq%20true${''}&$expand=Media,Rooms,UnitTypes`;
+
     await this.prisma.media.deleteMany({});
     await this.prisma.property.deleteMany({});
 
@@ -54,7 +61,7 @@ export class TasksService {
       );
 
       const properties = response.data.value;
-      console.log(properties.length);
+      // console.log(properties.length);
 
       const promises = properties.map((p) => {
         const promise = this.prisma.property.create({
