@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron('1 4 * * *')
+  @Cron('1 5 * * *')
   async handleCron() {
     try {
       console.log('\n');
@@ -74,8 +74,8 @@ export class TasksService {
                 createMany: {
                   data:
                     p.Media?.map((m) => ({
-                      url: m.MediaURL,
-                      order: m.Order,
+                      url: m.MediaURL ?? '',
+                      order: m.Order ?? 1,
                     })) ?? [],
                 },
               },

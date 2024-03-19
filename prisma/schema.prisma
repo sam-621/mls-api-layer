@@ -67,8 +67,8 @@ model Property {
 
 model Media {
   id    String @id @default(uuid())
-  url   String
-  order Int
+  url   String @default("")
+  order Int    @default(1)
 
   property   Property @relation(fields: [propertyId], references: [id])
   propertyId String
