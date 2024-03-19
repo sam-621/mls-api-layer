@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron('20 17 * * *')
+  @Cron('26 17 * * *')
   async handleCron() {
     try {
       console.log('\n');
