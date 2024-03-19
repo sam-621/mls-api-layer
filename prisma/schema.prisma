@@ -24,13 +24,13 @@ model Property {
   exteriorFeatures        String[] @map("exterior_features")
   roof                    String[]
   sewer                   String[]
-  areaName                String   @map("area_name")
+  areaName                String   @default("") @map("area_name")
   daysOnMarket            Int      @map("days_on_market")
   associationAmenities    String[] @map("association_amenities")
   garage                  Boolean  @default(false)
   parkingFeatures         String[] @map("parking_features")
   view                    String[]
-  county                  String
+  county                  String   @default("")
   waterSource             String[] @map("water_source")
   poolFeatures            String[] @map("pool_features")
   buyerAgencyCompensation String   @map("buyer_agency_compensation")
@@ -39,19 +39,19 @@ model Property {
   beds                    Int
   baths                   Int
   isForSale               Boolean  @default(false)
-  status                  String
+  status                  String   @default("")
   latitude                Float
   longitude               Float
   propertyType            String   @map("property_type")
   mlsId                   String   @map("mls_id")
   listedAt                DateTime @map("listed_at")
   updatedAt               DateTime @map("updated_at")
-  description             String
+  description             String   @default("")
   cooling                 Boolean  @default(false)
   heating                 Boolean  @default(false)
-  city                    String
-  pc                      String
-  address                 String
+  city                    String   @default("")
+  pc                      String   @default("")
+  address                 String   @default("")
   stateOrProvince         String   @map("state_or_province")
   garageSpaces            Int      @map("garage_spaces")
   lotSize                 Int      @map("lot_size")
