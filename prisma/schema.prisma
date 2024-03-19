@@ -16,7 +16,7 @@ datasource db {
 model Property {
   id                      String    @id @default(uuid())
   title                   String
-  listAgentMlsId          String    @map("list_agent_mls_id")
+  listAgentMlsId          String    @default("") @map("list_agent_mls_id")
   interiorFeatures        String[]  @map("interior_features")
   appliances              String[]
   floorDescription        String    @default("") @map("floor_description")
