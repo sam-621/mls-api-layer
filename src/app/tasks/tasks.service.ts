@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron('45 2 * * *')
+  @Cron('47 2 * * *')
   async handleCron() {
     try {
       console.log('\n');
@@ -142,6 +142,8 @@ export class TasksService {
       count++;
     }
 
-    this.logger.log(`Done! hi properties saved.`);
+    const propLength = await this.prisma.property.count();
+
+    this.logger.log(`Done! ${propLength} properties saved.`);
   }
 }
