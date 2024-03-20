@@ -34,7 +34,7 @@ model Property {
   waterSource             String[]  @map("water_source")
   poolFeatures            String[]  @map("pool_features")
   buyerAgencyCompensation String    @map("buyer_agency_compensation")
-  price                   Float
+  price                   Decimal   @db.Decimal(14, 2)
   squareFt                Int
   beds                    Int
   baths                   Int
