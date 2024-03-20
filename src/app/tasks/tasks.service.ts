@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { firstValueFrom } from 'rxjs';
 import { MlsAPIResponse } from '../mls/mls.type';
 import { ConfigService } from '@nestjs/config';
@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+  @Cron('42 16 * * *')
   async handleCron() {
     try {
       console.log('\n');
