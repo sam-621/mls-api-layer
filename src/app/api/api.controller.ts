@@ -97,7 +97,7 @@ export class ApiController {
       map: data.map((p) => ({
         id: p.mlsId,
         price: p.price ?? 0,
-        image: '',
+        image: p.Media[0].url,
         squareFt: p.squareFt ?? 0,
         address: {
           name: p.address,
