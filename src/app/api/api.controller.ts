@@ -80,7 +80,7 @@ export class ApiController {
         .slice(Number(skip), Number(skip) + Number(take))
         .map((p) => ({
           id: p.mlsId,
-          price: p.price ?? 0,
+          price: (p.price ?? 0) as number,
           image: p.Media[0].url,
           squareFt: p.squareFt ?? 0,
           beds: p.beds ?? 0,
@@ -96,7 +96,7 @@ export class ApiController {
         })),
       map: data.map((p) => ({
         id: p.mlsId,
-        price: p.price ?? 0,
+        price: (p.price ?? 0) as number,
         image: p.Media[0].url,
         squareFt: p.squareFt ?? 0,
         address: {
