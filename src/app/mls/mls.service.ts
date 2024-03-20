@@ -276,11 +276,17 @@ export class MlsService {
 
   orderBy(values: (Property & { Media: Media[] })[], order: ListingOrder) {
     if (order === ListingOrder.HIGHEST_PRICE) {
-      return values.sort((a, b) => b.price - a.price);
+      return values.sort(
+        (a, b) =>
+          (b.price as unknown as number) - (a.price as unknown as number),
+      );
     }
 
     if (order === ListingOrder.LOWEST_PRICE) {
-      return values.sort((a, b) => a.price - b.price);
+      return values.sort(
+        (a, b) =>
+          (a.price as unknown as number) - (b.price as unknown as number),
+      );
     }
 
     if (order === ListingOrder.NEWEST) {
