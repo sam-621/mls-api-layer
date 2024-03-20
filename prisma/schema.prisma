@@ -34,7 +34,7 @@ model Property {
   waterSource             String[]  @map("water_source")
   poolFeatures            String[]  @map("pool_features")
   buyerAgencyCompensation String    @map("buyer_agency_compensation")
-  price                   BigInt
+  price                   Float
   squareFt                Int
   beds                    Int
   baths                   Int
