@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron('29 20 * * *')
+  @Cron('40 22 * * *')
   async handleCron() {
     try {
       console.log('\n');
@@ -68,6 +68,8 @@ export class TasksService {
         const properties = response.data.value;
 
         const promises = properties.map((p) => {
+          console.log({ price: p.ListPrice });
+
           const promise = this.prisma.property.create({
             data: {
               Media: {
