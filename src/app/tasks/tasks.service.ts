@@ -37,6 +37,7 @@ export class TasksService {
   }
 
   private async getProperties() {
+    let current = null;
     try {
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
@@ -68,7 +69,7 @@ export class TasksService {
         const properties = response.data.value;
 
         const promises = properties.map((p) => {
-          console.log({ price: p.ListPrice });
+          current = p;
 
           const promise = this.prisma.property.create({
             data: {
@@ -150,6 +151,8 @@ export class TasksService {
       this.logger.log(`Done! ${propLength} properties saved.`);
     } catch (error) {
       this.logger.error(error);
+      console.log(current);
+
       this.logger.log(`Done with error`);
     }
   }
