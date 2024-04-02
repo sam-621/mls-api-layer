@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron('20 1 * * *')
+  @Cron('15 2 * * *')
   async handleCron() {
     try {
       console.log('\n');
@@ -37,7 +37,6 @@ export class TasksService {
   }
 
   private async getProperties() {
-    let current = null;
     try {
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
@@ -69,76 +68,81 @@ export class TasksService {
         const properties = response.data.value;
 
         const promises = properties.map((p) => {
-          current = p;
-
-          const promise = this.prisma.property.create({
-            data: {
-              Media: {
-                createMany: {
-                  data:
-                    p.Media?.map((m) => ({
-                      url: m.MediaURL ?? '',
-                      order: m.Order ?? 1,
-                    })) ?? [],
+          try {
+            const promise = this.prisma.property.create({
+              data: {
+                Media: {
+                  createMany: {
+                    data:
+                      p.Media?.map((m) => ({
+                        url: m.MediaURL ?? '',
+                        order: m.Order ?? 1,
+                      })) ?? [],
+                  },
                 },
+                address: p.UnparsedAddress ?? '',
+                city: p.City ?? '',
+                baths: p.BathroomsTotalInteger ?? 0,
+                beds: p.BedroomsTotal ?? 0,
+                price: p.ListPrice ?? 0,
+                description: p.PublicRemarks,
+                garageSpaces: p.GarageSpaces ?? 0,
+                latitude: p.Latitude ?? 0,
+                longitude: p.Longitude ?? 0,
+                hasAssociationFee: p.AssociationYN ?? false,
+                hasWaterfront: p.WaterfrontYN ?? false,
+                isForSale:
+                  p.ListingAgreement === 'Exclusive Right To Sell' ||
+                  p.ListingAgreement === 'Exclusive Agency',
+                listedAt: p.OriginalEntryTimestamp,
+                mlsId: p.ListingKey,
+                pc: p.PostalCode,
+                propertyType: p.PropertyType,
+                squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
+                listAgentMlsId: p.ListAgentMlsId ?? '',
+                areaName: p.MLSAreaMajor ?? '',
+                buyerAgencyCompensation: p.BuyerAgencyCompensation ?? '',
+                contractDate: p.ListingContractDate,
+                county: p.CountyOrParish ?? '',
+                daysOnMarket: p.DaysOnMarket ?? 0,
+                floorDescription: p.Rooms?.length
+                  ? p.Rooms[0].MFR_RoomFlooring
+                  : '',
+                lotSize: p.LotSizeAcres ?? 0,
+                roof: p.Roof ?? [],
+                sewer: p.Sewer ?? [],
+                stateOrProvince: p.StateOrProvince,
+                status: p.MFR_PreviousStatus ?? '',
+                title: p.StreetName ?? '',
+                stories: p.StoriesTotal ?? 0,
+                hasPool: p.PoolPrivateYN ?? false,
+                updatedAt: p.ModificationTimestamp,
+                yearBuilt: p.YearBuilt ?? 0,
+                cooling: !!p.Cooling,
+                heating: !!p.Heating,
+                waterSource: p.WaterSource ?? [],
+                appliances: p.Appliances ?? [],
+                associationAmenities: p.AssociationAmenities ?? [],
+                exteriorFeatures: p.ExteriorFeatures ?? [],
+                firePlace: p.FireplaceYN ?? false,
+                garage: p.GarageYN ?? false,
+                interiorFeatures: p.InteriorFeatures ?? [],
+                poolFeatures: p.PoolFeatures ?? [],
+                parkingFeatures: p.ParkingFeatures ?? [],
+                view: p.View ?? [],
               },
-              address: p.UnparsedAddress ?? '',
-              city: p.City ?? '',
-              baths: p.BathroomsTotalInteger ?? 0,
-              beds: p.BedroomsTotal ?? 0,
-              price: p.ListPrice ?? 0,
-              description: p.PublicRemarks,
-              garageSpaces: p.GarageSpaces ?? 0,
-              latitude: p.Latitude ?? 0,
-              longitude: p.Longitude ?? 0,
-              hasAssociationFee: p.AssociationYN ?? false,
-              hasWaterfront: p.WaterfrontYN ?? false,
-              isForSale:
-                p.ListingAgreement === 'Exclusive Right To Sell' ||
-                p.ListingAgreement === 'Exclusive Agency',
-              listedAt: p.OriginalEntryTimestamp,
-              mlsId: p.ListingKey,
-              pc: p.PostalCode,
-              propertyType: p.PropertyType,
-              squareFt: (p?.BuildingAreaTotal || p?.LotSizeSquareFeet) ?? 0,
-              listAgentMlsId: p.ListAgentMlsId ?? '',
-              areaName: p.MLSAreaMajor ?? '',
-              buyerAgencyCompensation: p.BuyerAgencyCompensation ?? '',
-              contractDate: p.ListingContractDate,
-              county: p.CountyOrParish ?? '',
-              daysOnMarket: p.DaysOnMarket ?? 0,
-              floorDescription: p.Rooms?.length
-                ? p.Rooms[0].MFR_RoomFlooring
-                : '',
-              lotSize: p.LotSizeAcres ?? 0,
-              roof: p.Roof ?? [],
-              sewer: p.Sewer ?? [],
-              stateOrProvince: p.StateOrProvince,
-              status: p.MFR_PreviousStatus ?? '',
-              title: p.StreetName ?? '',
-              stories: p.StoriesTotal ?? 0,
-              hasPool: p.PoolPrivateYN ?? false,
-              updatedAt: p.ModificationTimestamp,
-              yearBuilt: p.YearBuilt ?? 0,
-              cooling: !!p.Cooling,
-              heating: !!p.Heating,
-              waterSource: p.WaterSource ?? [],
-              appliances: p.Appliances ?? [],
-              associationAmenities: p.AssociationAmenities ?? [],
-              exteriorFeatures: p.ExteriorFeatures ?? [],
-              firePlace: p.FireplaceYN ?? false,
-              garage: p.GarageYN ?? false,
-              interiorFeatures: p.InteriorFeatures ?? [],
-              poolFeatures: p.PoolFeatures ?? [],
-              parkingFeatures: p.ParkingFeatures ?? [],
-              view: p.View ?? [],
-            },
-          });
+            });
 
-          return promise;
+            return promise;
+          } catch (error) {
+            this.logger.error(error);
+            return undefined;
+          }
         });
 
-        await this.prisma.$transaction(promises);
+        const onlySucceedPromises = promises.filter((p) => p !== undefined);
+
+        await this.prisma.$transaction(onlySucceedPromises);
 
         currentNextLink = response.data['@odata.nextLink'];
         console.log('currentNextLink', currentNextLink);
@@ -151,7 +155,6 @@ export class TasksService {
       this.logger.log(`Done! ${propLength} properties saved.`);
     } catch (error) {
       this.logger.error(error);
-      console.log(current);
 
       this.logger.log(`Done with error`);
     }
