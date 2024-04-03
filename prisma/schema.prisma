@@ -43,7 +43,7 @@ model Property {
   latitude                Float
   longitude               Float
   propertyType            String    @map("property_type")
-  mlsId                   String    @map("mls_id")
+  mlsId                   String    @unique @map("mls_id")
   listedAt                DateTime? @map("listed_at")
   updatedAt               DateTime? @map("updated_at")
   description             String    @default("")
@@ -72,4 +72,9 @@ model Media {
 
   property   Property @relation(fields: [propertyId], references: [id])
   propertyId String
+}
+
+model Replication {
+  id                  String   @id @default(uuid())
+  lastReplicationTime DateTime @default(now())
 }

@@ -1,10 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { firstValueFrom } from 'rxjs';
 import { MlsAPIResponse } from '../mls/mls.type';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../persistance/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
@@ -17,7 +18,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron('28 17 * * *')
+  @Cron(CronExpression.EVERY_2_HOURS)
   async handleCron() {
     try {
       console.log('\n');
@@ -38,19 +39,20 @@ export class TasksService {
 
   private async getProperties() {
     try {
+      const result = await this.prisma.replication.findMany();
+      const lastReplicate = result[0];
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
       let count = 0;
-      const LIMIT = 500;
+      const LIMIT = 400;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
-      const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%202024-03-15T05:21:00.008Z`;
+      const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%${lastReplicate?.lastReplicationTime}`;
       let currentNextLink =
         MLS_DOMAIN +
-        `/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27%20and%20MlgCanView%20eq%20true${''}&$expand=Media,Rooms,UnitTypes`;
-
-      await this.prisma.media.deleteMany({});
-      await this.prisma.property.deleteMany({});
+        `/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27%20and%20MlgCanView%20eq%20true${
+          lastReplicate?.lastReplicationTime ? MODIFICATION_TIMESTAMP : ''
+        }&$expand=Media,Rooms,UnitTypes`;
 
       while (currentNextLink !== undefined) {
         if (count === LIMIT) {
@@ -86,8 +88,8 @@ export class TasksService {
               price: p.ListPrice ?? 0,
               description: p.PublicRemarks,
               garageSpaces: p.GarageSpaces ?? 0,
-              latitude: p.Latitude ?? 0,
-              longitude: p.Longitude ?? 0,
+              latitude: Number(p.Latitude ?? 0) ?? 0,
+              longitude: Number(p.Longitude ?? 0) ?? 0,
               hasAssociationFee: p.AssociationYN ?? false,
               hasWaterfront: p.WaterfrontYN ?? false,
               isForSale:
@@ -150,6 +152,11 @@ export class TasksService {
       const propLength = await this.prisma.property.count();
 
       this.logger.log(`Done! ${propLength} properties saved.`);
+      this.prisma.replication.upsert({
+        where: { id: lastReplicate.id },
+        create: {},
+        update: { lastReplicationTime: new Date() },
+      });
     } catch (error) {
       this.logger.error(error);
 
