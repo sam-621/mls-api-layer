@@ -44,6 +44,7 @@ export class PropertiesDto {
   hasAC?: boolean;
   hasHeater?: boolean;
   description?: string;
+  zoom: number;
 }
 
 export class SearchCriteriaDto {

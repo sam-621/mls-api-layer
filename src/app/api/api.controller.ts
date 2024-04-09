@@ -5,6 +5,19 @@ import { MlsService } from '../mls/mls.service';
 import { ListingPropertiesResponse, PropertiesResponse } from './api.types';
 import { PrismaService } from '../persistance/prisma.service';
 
+const RESULTS = {
+  9: 150,
+  8: 100,
+  7: 50,
+  6: 30,
+  5: 10,
+  4: 10,
+  3: 5,
+  2: 5,
+  1: 3,
+  0: 2,
+};
+
 @Controller('/properties')
 export class ApiController {
   constructor(
@@ -66,6 +79,7 @@ export class ApiController {
       include: {
         Media: true,
       },
+      take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
     });
 
     if (input.order) {
