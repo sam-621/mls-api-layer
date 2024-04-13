@@ -5,7 +5,6 @@ import { firstValueFrom } from 'rxjs';
 import { MlsAPIResponse } from '../mls/mls.type';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../persistance/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
