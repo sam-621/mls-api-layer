@@ -152,7 +152,7 @@ export class TasksService {
 
       this.logger.log(`Done! ${propLength} properties saved.`);
       this.prisma.replication.upsert({
-        where: { id: lastReplicate.id },
+        where: { id: lastReplicate?.id },
         create: {},
         update: { lastReplicationTime: new Date() },
       });
