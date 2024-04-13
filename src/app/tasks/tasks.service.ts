@@ -151,13 +151,20 @@ export class TasksService {
       const propLength = await this.prisma.property.count();
 
       this.logger.log(`Done! ${propLength} properties saved.`);
-      const r = await this.prisma.replication.upsert({
-        where: { id: lastReplicate?.id },
-        create: {},
-        update: { lastReplicationTime: new Date() },
-      });
+      let r;
 
-      this.logger.log(`Replication date updated: ${r.lastReplicationTime}`);
+      if (lastReplicate) {
+        r = await this.prisma.replication.update({
+          where: { id: lastReplicate.id },
+          data: { lastReplicationTime: new Date() },
+        });
+      } else {
+        r = await this.prisma.replication.create({
+          data: { lastReplicationTime: new Date() },
+        });
+      }
+
+      this.logger.log(`Replication date updated: ${r?.lastReplicationTime}`);
     } catch (error) {
       this.logger.error(error);
 
