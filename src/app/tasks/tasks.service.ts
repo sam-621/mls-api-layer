@@ -46,7 +46,9 @@ export class TasksService {
       const LIMIT = 400;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
-      const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%${lastReplicate?.lastReplicationTime.toISOString()}`;
+      const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%${new Date(
+        lastReplicate?.lastReplicationTime,
+      ).toISOString()}`;
       let currentNextLink =
         MLS_DOMAIN +
         `/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27%20and%20MlgCanView%20eq%20true${
