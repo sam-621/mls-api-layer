@@ -49,11 +49,15 @@ export class TasksService {
       const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%${new Date(
         lastReplicate?.lastReplicationTime,
       ).toISOString()}`;
+      console.log('MODIFICATION_TIMESTAMP', MODIFICATION_TIMESTAMP);
+
       let currentNextLink =
         MLS_DOMAIN +
         `/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27%20and%20MlgCanView%20eq%20true${
           lastReplicate?.lastReplicationTime ? MODIFICATION_TIMESTAMP : ''
         }&$expand=Media,Rooms,UnitTypes`;
+
+      console.log('currentNextLink', currentNextLink);
 
       while (currentNextLink !== undefined) {
         if (count === LIMIT) {
