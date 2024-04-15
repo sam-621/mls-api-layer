@@ -173,6 +173,7 @@ export class TasksService {
       this.logger.log(`Replication date updated: ${r?.lastReplicationTime}`);
     } catch (error) {
       this.logger.error(error);
+      console.log(error);
 
       this.logger.log(`Done with error`);
     }
