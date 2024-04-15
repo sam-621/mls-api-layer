@@ -46,7 +46,7 @@ export class TasksService {
       const LIMIT = 400;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
-      const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%${new Date(
+      const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%20${new Date(
         lastReplicate?.lastReplicationTime,
       ).toISOString()}`;
       console.log('MODIFICATION_TIMESTAMP', MODIFICATION_TIMESTAMP);
