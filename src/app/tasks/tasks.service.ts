@@ -43,7 +43,7 @@ export class TasksService {
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
       let count = 0;
-      const LIMIT = 400;
+      const LIMIT = 500;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
       const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%20${new Date(
@@ -58,6 +58,8 @@ export class TasksService {
         }&$expand=Media,Rooms,UnitTypes`;
 
       console.log('currentNextLink', currentNextLink);
+
+      let newGreatestModificationTimestamp;
 
       while (currentNextLink !== undefined) {
         if (count === LIMIT) {
@@ -75,6 +77,8 @@ export class TasksService {
         const properties = response.data.value;
 
         const promises = properties.map((p) => {
+          newGreatestModificationTimestamp = p.ModificationTimestamp;
+
           const promise = this.prisma.property.create({
             data: {
               Media: {
@@ -154,7 +158,8 @@ export class TasksService {
         count++;
       }
 
-      const propLength = await this.prisma.property.count();
+      // number of request * properties per request
+      const propLength = count * 500;
 
       this.logger.log(`Done! ${propLength} properties saved.`);
       let r;
@@ -162,11 +167,15 @@ export class TasksService {
       if (lastReplicate) {
         r = await this.prisma.replication.update({
           where: { id: lastReplicate.id },
-          data: { lastReplicationTime: new Date() },
+          data: {
+            lastReplicationTime: new Date(newGreatestModificationTimestamp),
+          },
         });
       } else {
         r = await this.prisma.replication.create({
-          data: { lastReplicationTime: new Date() },
+          data: {
+            lastReplicationTime: new Date(newGreatestModificationTimestamp),
+          },
         });
       }
 
