@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron(CronExpression.EVERY_2_HOURS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleCron() {
     try {
       console.log('\n');
@@ -40,15 +40,19 @@ export class TasksService {
     try {
       const result = await this.prisma.replication.findMany();
       const lastReplicate = result[0];
+      console.log(result);
+
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
       let count = 0;
       const LIMIT = 500;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
-      const MODIFICATION_TIMESTAMP = `%20and%20ModificationTimestamp%20gt%20${new Date(
-        lastReplicate?.lastReplicationTime,
-      ).toISOString()}`;
+      const MODIFICATION_TIMESTAMP = lastReplicate?.lastReplicationTime
+        ? `%20and%20ModificationTimestamp%20gt%20${new Date(
+            lastReplicate?.lastReplicationTime,
+          ).toISOString()}`
+        : '';
       console.log('MODIFICATION_TIMESTAMP', MODIFICATION_TIMESTAMP);
 
       let currentNextLink =
