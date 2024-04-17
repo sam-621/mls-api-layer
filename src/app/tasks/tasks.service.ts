@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleCron() {
     try {
       console.log('\n');
@@ -40,7 +40,6 @@ export class TasksService {
     try {
       const result = await this.prisma.replication.findMany();
       const lastReplicate = result[0];
-      console.log(result);
 
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
@@ -77,6 +76,9 @@ export class TasksService {
             },
           }),
         );
+
+        // wait 2 seconds to avoid api restriction
+        await sleep(2000);
 
         const properties = response.data.value;
 
@@ -191,4 +193,10 @@ export class TasksService {
       this.logger.log(`Done with error`);
     }
   }
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
