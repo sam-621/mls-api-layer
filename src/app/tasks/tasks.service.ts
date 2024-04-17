@@ -17,7 +17,7 @@ export class TasksService {
 
   // Run every Friday at 12am
   // @Cron('0 0 * * 5')
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_2_HOURS)
   async handleCron() {
     try {
       console.log('\n');
@@ -44,7 +44,7 @@ export class TasksService {
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
       let count = 0;
-      const LIMIT = 500;
+      const LIMIT = 400;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
       const MODIFICATION_TIMESTAMP = lastReplicate?.lastReplicationTime
