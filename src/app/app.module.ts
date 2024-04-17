@@ -11,7 +11,7 @@ import { PrismaModule } from './persistance/prisma.module';
     PrismaModule,
     ApiModule,
     ScheduleModule.forRoot(),
-    // TaskModule,
+    TaskModule,
   ],
 })
 export class AppModule {}
