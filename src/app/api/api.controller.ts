@@ -76,15 +76,18 @@ export class ApiController {
           contains: input.description,
         },
       },
-      include: {
-        Media: true,
-      },
+
       take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
     };
 
     const results = await this.prismaService.$transaction([
-      this.prismaService.property.findMany(prismaQuery),
-      this.prismaService.property.count(),
+      this.prismaService.property.findMany({
+        ...prismaQuery,
+        include: {
+          Media: true,
+        },
+      }),
+      this.prismaService.property.count(prismaQuery),
     ]);
     let data = results[0];
     const total = results[1];
