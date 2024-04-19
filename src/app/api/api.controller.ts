@@ -76,8 +76,6 @@ export class ApiController {
           contains: input.description,
         },
       },
-
-      take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
     };
 
     const results = await this.prismaService.$transaction([
@@ -87,20 +85,26 @@ export class ApiController {
           Media: true,
         },
       }),
-      this.prismaService.property.count(prismaQuery),
+      this.prismaService.property.findMany({
+        ...prismaQuery,
+        include: {
+          Media: true,
+        },
+        take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
+      }),
     ]);
-    let data = results[0];
-    const total = results[1];
+    let listing = results[0];
+    const map = results[0];
 
     if (input.order) {
-      data = this.mlsService.orderBy(data, input.order);
+      listing = this.mlsService.orderBy(listing, input.order);
     }
 
     const { skip, take } = input.pagination;
 
     return {
-      total: total,
-      listing: data
+      total: listing.length,
+      listing: listing
         .slice(Number(skip), Number(skip) + Number(take))
         .map((p) => ({
           id: p.mlsId,
@@ -118,7 +122,7 @@ export class ApiController {
           isForSale: p.isForSale,
           status: p.status as ListingPropertiesResponse['status'],
         })),
-      map: data.map((p) => ({
+      map: map.map((p) => ({
         id: p.mlsId,
         price: (p.price ?? 0) as number,
         image: p.Media.length ? p.Media[0].url : '',
