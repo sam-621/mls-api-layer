@@ -94,7 +94,7 @@ export class ApiController {
       }),
     ]);
     let listing = results[0];
-    const map = results[0];
+    const map = results[1];
 
     if (input.order) {
       listing = this.mlsService.orderBy(listing, input.order);
