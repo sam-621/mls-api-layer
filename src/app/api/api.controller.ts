@@ -30,7 +30,7 @@ export class ApiController {
     @Body()
     input: PropertiesDto,
   ): Promise<PropertiesResponse> {
-    let data = await this.prismaService.property.findMany({
+    const prismaQuery = {
       where: {
         longitude: {
           gte: parseFloat(input.bounds.minLng),
@@ -80,7 +80,14 @@ export class ApiController {
         Media: true,
       },
       take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
-    });
+    };
+
+    const results = await this.prismaService.$transaction([
+      this.prismaService.property.findMany(prismaQuery),
+      this.prismaService.property.count(),
+    ]);
+    let data = results[0];
+    const total = results[1];
 
     if (input.order) {
       data = this.mlsService.orderBy(data, input.order);
@@ -89,7 +96,7 @@ export class ApiController {
     const { skip, take } = input.pagination;
 
     return {
-      total: data.length,
+      total: total,
       listing: data
         .slice(Number(skip), Number(skip) + Number(take))
         .map((p) => ({
