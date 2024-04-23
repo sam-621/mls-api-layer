@@ -44,7 +44,7 @@ export class TasksService {
       // let data: Value[] = [];
       //2020-12-30T23:59:59.99Z
       let count = 0;
-      const LIMIT = 200;
+      const LIMIT = 100;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
       const MODIFICATION_TIMESTAMP = lastReplicate?.lastReplicationTime
