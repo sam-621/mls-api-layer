@@ -30,7 +30,7 @@ export class ApiController {
     @Body()
     input: PropertiesDto,
   ): Promise<PropertiesResponse> {
-    const prismaQuery = {
+    let data = await this.prismaService.property.findMany({
       where: {
         longitude: {
           gte: parseFloat(input.bounds.minLng),
@@ -76,35 +76,21 @@ export class ApiController {
           contains: input.description,
         },
       },
-    };
-
-    const results = await this.prismaService.$transaction([
-      this.prismaService.property.findMany({
-        ...prismaQuery,
-        include: {
-          Media: true,
-        },
-      }),
-      this.prismaService.property.findMany({
-        ...prismaQuery,
-        include: {
-          Media: true,
-        },
-        take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
-      }),
-    ]);
-    let listing = results[0];
-    const map = results[1];
+      include: {
+        Media: true,
+      },
+      take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
+    });
 
     if (input.order) {
-      listing = this.mlsService.orderBy(listing, input.order);
+      data = this.mlsService.orderBy(data, input.order);
     }
 
     const { skip, take } = input.pagination;
 
     return {
-      total: listing.length,
-      listing: listing
+      total: data.length,
+      listing: data
         .slice(Number(skip), Number(skip) + Number(take))
         .map((p) => ({
           id: p.mlsId,
@@ -122,7 +108,7 @@ export class ApiController {
           isForSale: p.isForSale,
           status: p.status as ListingPropertiesResponse['status'],
         })),
-      map: map.map((p) => ({
+      map: data.map((p) => ({
         id: p.mlsId,
         price: (p.price ?? 0) as number,
         image: p.Media.length ? p.Media[0].url : '',
