@@ -18,8 +18,7 @@ export class TasksService {
   ) {}
 
   // Run every Friday at 12am
-  // @Cron('0 0 * * 5')
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron('0 0 * * 5')
   async initialImportCron() {
     try {
       console.log('\n');
@@ -38,28 +37,28 @@ export class TasksService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_5_MINUTES)
-  // async migrateFromS3ToCloudfrontCron() {
-  //   try {
-  //     console.log('\n');
+  @Cron(CronExpression.EVERY_HOUR)
+  async migrateFromS3ToCloudfrontCron() {
+    try {
+      console.log('\n');
 
-  //     console.time('migrate-from-s3-to-cloudfront-cron-job');
-  //     this.logger.log('Migrating from S3 to Cloudfront corn job started');
+      console.time('migrate-from-s3-to-cloudfront-cron-job');
+      this.logger.log('Migrating from S3 to Cloudfront corn job started');
 
-  //     await this.migrateFromS3ToCloudfront();
+      await this.migrateFromS3ToCloudfront();
 
-  //     this.logger.log(
-  //       'Migrating from S3 to Cloudfront corn job Ended successfully',
-  //     );
-  //     console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
-  //   } catch (error) {
-  //     this.logger.error(
-  //       'Migrating from S3 to Cloudfront corn job Ended with error',
-  //     );
-  //     this.logger.error(error);
-  //     console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
-  //   }
-  // }
+      this.logger.log(
+        'Migrating from S3 to Cloudfront corn job Ended successfully',
+      );
+      console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
+    } catch (error) {
+      this.logger.error(
+        'Migrating from S3 to Cloudfront corn job Ended with error',
+      );
+      this.logger.error(error);
+      console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
+    }
+  }
 
   private async getInitialImport() {
     try {
@@ -218,7 +217,7 @@ export class TasksService {
   }
 
   async migrateFromS3ToCloudfront() {
-    const IMAGES_PER_PROCESS = 10000;
+    const IMAGES_PER_PROCESS = 10_000;
 
     const media = await this.prisma.media.findMany({
       where: {
