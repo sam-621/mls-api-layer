@@ -228,8 +228,14 @@ export class TasksService {
       take: IMAGES_PER_PROCESS,
     });
 
+    let band = false;
     const prismaPromises = media.map((m) => {
       const newUrl = this.getCloudfrontUrl(m.url);
+
+      if (!band) {
+        console.log('newUrl', newUrl);
+        band = true;
+      }
 
       return this.prisma.media.update({
         where: {
@@ -242,6 +248,8 @@ export class TasksService {
     });
 
     await this.prisma.$transaction(prismaPromises);
+
+    console.log('Images migrated: ', media.length);
   }
 
   private getCloudfrontUrl(medialUrl: string) {
