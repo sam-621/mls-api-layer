@@ -37,28 +37,28 @@ export class TasksService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_30_MINUTES)
-  // async migrateFromS3ToCloudfrontCron() {
-  //   try {
-  //     console.log('\n');
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async migrateFromS3ToCloudfrontCron() {
+    try {
+      console.log('\n');
 
-  //     console.time('migrate-from-s3-to-cloudfront-cron-job');
-  //     this.logger.log('Migrating from S3 to Cloudfront corn job started');
+      console.time('migrate-from-s3-to-cloudfront-cron-job');
+      this.logger.log('Migrating from S3 to Cloudfront corn job started');
 
-  //     await this.migrateFromS3ToCloudfront();
+      await this.migrateFromS3ToCloudfront();
 
-  //     this.logger.log(
-  //       'Migrating from S3 to Cloudfront corn job Ended successfully',
-  //     );
-  //     console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
-  //   } catch (error) {
-  //     this.logger.error(
-  //       'Migrating from S3 to Cloudfront corn job Ended with error',
-  //     );
-  //     this.logger.error(error);
-  //     console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
-  //   }
-  // }
+      this.logger.log(
+        'Migrating from S3 to Cloudfront corn job Ended successfully',
+      );
+      console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
+    } catch (error) {
+      this.logger.error(
+        'Migrating from S3 to Cloudfront corn job Ended with error',
+      );
+      this.logger.error(error);
+      console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
+    }
+  }
 
   private async getInitialImport() {
     try {
@@ -217,7 +217,7 @@ export class TasksService {
   }
 
   async migrateFromS3ToCloudfront() {
-    const IMAGES_PER_PROCESS = 100_000;
+    const IMAGES_PER_PROCESS = 1_000_000;
 
     const media = await this.prisma.media.findMany({
       where: {
