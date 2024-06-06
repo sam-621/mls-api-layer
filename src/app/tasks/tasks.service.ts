@@ -37,7 +37,7 @@ export class TasksService {
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async migrateFromS3ToCloudfrontCron() {
     try {
       console.log('\n');
@@ -217,7 +217,7 @@ export class TasksService {
   }
 
   async migrateFromS3ToCloudfront() {
-    const IMAGES_PER_PROCESS = 10_000;
+    const IMAGES_PER_PROCESS = 100_000;
 
     const media = await this.prisma.media.findMany({
       where: {
