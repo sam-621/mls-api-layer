@@ -4,7 +4,7 @@ export const main = async () => {
   const prisma = new PrismaClient();
 
   const count = await prisma.media.count({
-    where: { url: { contains: 'd156fyhrgb1drp.cloudfront.net' } },
+    where: { url: { contains: 'd1w4u23c1d7gv3.cloudfront.net' } },
   });
 
   console.log({
