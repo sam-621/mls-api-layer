@@ -6,8 +6,11 @@ import { ListingPropertiesResponse, PropertiesResponse } from './api.types';
 import { PrismaService } from '../persistance/prisma.service';
 
 const RESULTS = {
-  9: 150,
-  8: 100,
+  12: 160,
+  11: 140,
+  10: 120,
+  9: 100,
+  8: 80,
   7: 50,
   6: 30,
   5: 10,
@@ -79,7 +82,7 @@ export class ApiController {
       include: {
         Media: true,
       },
-      take: input.zoom >= 10 ? undefined : RESULTS[input.zoom],
+      take: input.zoom >= 13 ? undefined : RESULTS[input.zoom],
     });
 
     if (input.order) {
