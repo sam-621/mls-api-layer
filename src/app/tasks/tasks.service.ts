@@ -216,8 +216,8 @@ export class TasksService {
     }
   }
 
-  async migrateFromS3ToCloudfront() {
-    const IMAGES_PER_PROCESS = 100_000;
+  private async migrateFromS3ToCloudfront() {
+    const IMAGES_PER_PROCESS = 500_000;
 
     const media = await this.prisma.media.findMany({
       where: {
