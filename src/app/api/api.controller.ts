@@ -81,9 +81,6 @@ export class ApiController {
           contains: input.description,
         },
       },
-      include: {
-        Media: true,
-      },
       take: input.zoom >= 15 ? undefined : RESULTS[input.zoom],
     });
 
@@ -100,7 +97,8 @@ export class ApiController {
         .map((p) => ({
           id: p.mlsId,
           price: (p.price ?? 0) as number,
-          image: p.Media.length ? p.Media[0].url : '',
+          // image: p.Media.length ? p.Media[0].url : '',
+          image: '',
           squareFt: p.squareFt ?? 0,
           beds: p.beds ?? 0,
           baths: p.baths ?? 0,
@@ -116,7 +114,8 @@ export class ApiController {
       map: data.map((p) => ({
         id: p.mlsId,
         price: (p.price ?? 0) as number,
-        image: p.Media.length ? p.Media[0].url : '',
+        // image: p.Media.length ? p.Media[0].url : '',
+        image: '',
         squareFt: p.squareFt ?? 0,
         address: {
           name: p.address,
