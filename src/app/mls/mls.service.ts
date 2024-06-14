@@ -274,7 +274,7 @@ export class MlsService {
     });
   }
 
-  orderBy(values: Property[], order: ListingOrder) {
+  orderBy(values: (Property & { Media: Media[] })[], order: ListingOrder) {
     if (order === ListingOrder.HIGHEST_PRICE) {
       return values.sort(
         (a, b) =>
