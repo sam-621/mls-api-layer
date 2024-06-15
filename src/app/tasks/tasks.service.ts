@@ -6,6 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { MlsAPIResponse } from '../mls/mls.type';
 import { firstValueFrom } from 'rxjs';
 import { sleep } from '@/lib/utils';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
@@ -37,26 +38,23 @@ export class TasksService {
     }
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
-  async migrateFromS3ToCloudfrontCron() {
+  // Run every Friday at 12am
+  @Cron(CronExpression.EVERY_HOUR)
+  async migrateImagesCron() {
     try {
       console.log('\n');
 
-      console.time('migrate-from-s3-to-cloudfront-cron-job');
-      this.logger.log('Migrating from S3 to Cloudfront corn job started');
+      console.time('migrate-images-cron-job');
+      this.logger.log('Migrate images cron job started');
 
-      await this.migrateFromS3ToCloudfront();
+      await this.migrateMediaFromMediaToPropertyTable();
 
-      this.logger.log(
-        'Migrating from S3 to Cloudfront corn job Ended successfully',
-      );
-      console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
+      this.logger.log('Migrate images cron job ended successfully');
+      console.timeEnd('migrate-images-cron-job');
     } catch (error) {
-      this.logger.error(
-        'Migrating from S3 to Cloudfront corn job Ended with error',
-      );
+      this.logger.error('Migrate images cron job Ended with error');
       this.logger.error(error);
-      console.timeEnd('migrate-from-s3-to-cloudfront-cron-job');
+      console.timeEnd('migrate-images-cron-job');
     }
   }
 
@@ -113,7 +111,7 @@ export class TasksService {
                 createMany: {
                   data:
                     p.Media?.map((m) => ({
-                      url: this.getCloudfrontUrl(m.MediaURL) ?? '',
+                      url: m.MediaURL ?? '',
                       order: m.Order ?? 1,
                     })) ?? [],
                 },
@@ -216,40 +214,73 @@ export class TasksService {
     }
   }
 
-  private async migrateFromS3ToCloudfront() {
-    const IMAGES_PER_PROCESS = 500_000;
+  /**
+   * 1. Get 100,000 properties
+   * 2. Get media from each property
+   * 3. Apply the cloudfront url to each media if needed
+   * 3. save that media array in the property table in the json field
+   * 4. delete the media from the media table
+   */
+  private async migrateMediaFromMediaToPropertyTable() {
+    const PROPERTIES_PER_PROCESS = 100_000;
 
-    const media = await this.prisma.media.findMany({
+    const properties = await this.prisma.property.findMany({
+      take: PROPERTIES_PER_PROCESS,
       where: {
-        url: {
-          contains: 's3.amazonaws.com',
+        images: {
+          equals: Prisma.DbNull,
         },
       },
-      take: IMAGES_PER_PROCESS,
+      include: {
+        Media: true,
+      },
     });
 
-    let band = false;
-    const prismaPromises = media.map((m) => {
-      const newUrl = this.getCloudfrontUrl(m.url);
+    const totalMedia = properties.reduce((acc, p) => {
+      return acc + p.Media.length;
+    }, 0);
 
-      if (!band) {
-        console.log('newUrl', newUrl);
-        band = true;
-      }
+    console.log({
+      totalMedia,
+      propertiesIds: properties.map((p) => p.id),
+      propertiesLength: properties.length,
+    });
 
-      return this.prisma.media.update({
+    const prismaPromises = properties.map((p) => {
+      const media = p.Media.map((m) => {
+        const newUrl = this.getCloudfrontUrl(m.url);
+
+        return {
+          url: newUrl,
+          order: m.order,
+        };
+      }) as Prisma.JsonArray;
+
+      return this.prisma.property.update({
         where: {
-          id: m.id,
+          id: p.id,
         },
         data: {
-          url: newUrl,
+          images: media,
         },
       });
     });
 
-    await this.prisma.$transaction(prismaPromises);
+    const newMedia = await this.prisma.$transaction(prismaPromises);
+    console.log({
+      newMedia: newMedia[0],
+    });
 
-    console.log('Images migrated: ', media.length);
+    await this.prisma.media.deleteMany({
+      where: {
+        propertyId: {
+          in: properties.map((p) => p.id),
+        },
+      },
+    });
+
+    console.log('Properties migrated: ', properties.length);
+    console.log('Images migrated', totalMedia);
   }
 
   private getCloudfrontUrl(medialUrl: string) {

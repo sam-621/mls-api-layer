@@ -61,6 +61,7 @@ model Property {
   hasWaterfront           Boolean   @default(false) @map("has_waterfront")
   hasPool                 Boolean   @default(false) @map("has_pool")
   contractDate            String?   @map("contract_date")
+  images                  Json?
 
   Media Media[]
 }
