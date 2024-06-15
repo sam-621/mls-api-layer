@@ -57,6 +57,7 @@ export class TasksService {
 
         imagesMigrated += a;
         propertiesMigrated += b;
+        console.log('Iteration: ', i + 1);
       }
 
       this.logger.log(
