@@ -101,7 +101,7 @@ export class ApiController {
           id: p.mlsId,
           price: (p.price ?? 0) as number,
           image: Array.isArray(p.images)
-            ? (p.images[0] as any).url
+            ? (p.images[0] as any)?.url
             : p.Media.length
             ? p.Media[0].url
             : '',
@@ -121,7 +121,7 @@ export class ApiController {
         id: p.mlsId,
         price: (p.price ?? 0) as number,
         image: Array.isArray(p.images)
-          ? (p.images[0] as any).url
+          ? (p.images[0] as any)?.url
           : p.Media.length
           ? p.Media[0].url
           : '',
