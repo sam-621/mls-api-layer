@@ -38,16 +38,31 @@ export class TasksService {
     }
   }
 
-  // Run every Friday at 12am
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_HOUR)
   async migrateImagesCron() {
+    const limit = 200;
+
+    let imagesMigrated = 0;
+    let propertiesMigrated = 0;
+
     try {
       console.log('\n');
 
       console.time('migrate-images-cron-job');
       this.logger.log('Migrate images cron job started');
 
-      await this.migrateMediaFromMediaToPropertyTable();
+      for (let i = 0; i < limit; i++) {
+        const { imagesMigrated: a, propertiesMigrated: b } =
+          await this.migrateMediaFromMediaToPropertyTable();
+
+        imagesMigrated += a;
+        propertiesMigrated += b;
+      }
+
+      this.logger.log(
+        `Migrated ${imagesMigrated} images from media to property table`,
+      );
+      this.logger.log(`Migrated ${propertiesMigrated} properties`);
 
       this.logger.log('Migrate images cron job ended successfully');
       console.timeEnd('migrate-images-cron-job');
@@ -220,6 +235,8 @@ export class TasksService {
    * 3. Apply the cloudfront url to each media if needed
    * 3. save that media array in the property table in the json field
    * 4. delete the media from the media table
+   *
+   * 13.423s
    */
   private async migrateMediaFromMediaToPropertyTable() {
     const PROPERTIES_PER_PROCESS = 500;
@@ -239,12 +256,6 @@ export class TasksService {
     const totalMedia = properties.reduce((acc, p) => {
       return acc + p.Media.length;
     }, 0);
-
-    console.log({
-      totalMedia,
-      propertiesIds: properties.map((p) => p.id),
-      propertiesLength: properties.length,
-    });
 
     const prismaPromises = properties.map((p) => {
       const media = p.Media.map((m) => {
@@ -266,11 +277,7 @@ export class TasksService {
       });
     });
 
-    const newMedia = await this.prisma.$transaction(prismaPromises);
-    console.log({
-      newMedia: newMedia[0],
-    });
-
+    await this.prisma.$transaction(prismaPromises);
     await this.prisma.media.deleteMany({
       where: {
         propertyId: {
@@ -281,6 +288,11 @@ export class TasksService {
 
     console.log('Properties migrated: ', properties.length);
     console.log('Images migrated', totalMedia);
+
+    return {
+      propertiesMigrated: properties.length,
+      imagesMigrated: totalMedia,
+    };
   }
 
   private getCloudfrontUrl(medialUrl: string) {
