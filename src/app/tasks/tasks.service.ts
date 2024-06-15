@@ -39,7 +39,7 @@ export class TasksService {
   }
 
   // Run every Friday at 12am
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async migrateImagesCron() {
     try {
       console.log('\n');
@@ -222,7 +222,7 @@ export class TasksService {
    * 4. delete the media from the media table
    */
   private async migrateMediaFromMediaToPropertyTable() {
-    const PROPERTIES_PER_PROCESS = 100_000;
+    const PROPERTIES_PER_PROCESS = 500;
 
     const properties = await this.prisma.property.findMany({
       take: PROPERTIES_PER_PROCESS,
