@@ -87,15 +87,6 @@ export class TasksService {
 
           const promise = this.prisma.property.create({
             data: {
-              Media: {
-                createMany: {
-                  data:
-                    p.Media?.map((m) => ({
-                      url: m.MediaURL ?? '',
-                      order: m.Order ?? 1,
-                    })) ?? [],
-                },
-              },
               address: p.UnparsedAddress ?? '',
               city: p.City ?? '',
               baths: p.BathroomsTotalInteger ?? 0,
@@ -146,6 +137,10 @@ export class TasksService {
               poolFeatures: p.PoolFeatures ?? [],
               parkingFeatures: p.ParkingFeatures ?? [],
               view: p.View ?? [],
+              images: p.Media?.map((m) => ({
+                url: m.MediaURL ?? '',
+                order: m.Order ?? 1,
+              })),
             },
           });
 

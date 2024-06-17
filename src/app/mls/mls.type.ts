@@ -1272,3 +1272,8 @@ export enum WindowFeature {
   ThermalWindows = 'Thermal Windows',
   WindowTreatments = 'Window Treatments',
 }
+
+export type PropertyImage = {
+  url: string;
+  order: number;
+};

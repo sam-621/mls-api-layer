@@ -4,6 +4,8 @@ import { PropertiesDto, SearchCriteriaDto } from './api.dto';
 import { MlsService } from '../mls/mls.service';
 import { ListingPropertiesResponse, PropertiesResponse } from './api.types';
 import { PrismaService } from '../persistance/prisma.service';
+import { Media, Property } from '@prisma/client';
+import { PropertyImage } from '../mls/mls.type';
 
 const RESULTS = {
   14: 200,
@@ -97,7 +99,7 @@ export class ApiController {
         .map((p) => ({
           id: p.mlsId,
           price: (p.price ?? 0) as number,
-          image: Array.isArray(p.images) ? (p.images[0] as any)?.url : '',
+          image: this.getDefaultImage(p),
           squareFt: p.squareFt ?? 0,
           beds: p.beds ?? 0,
           baths: p.baths ?? 0,
@@ -113,7 +115,7 @@ export class ApiController {
       map: data.map((p) => ({
         id: p.mlsId,
         price: (p.price ?? 0) as number,
-        image: Array.isArray(p.images) ? (p.images[0] as any)?.url : '',
+        image: this.getDefaultImage(p),
         squareFt: p.squareFt ?? 0,
         address: {
           name: p.address,
@@ -132,7 +134,9 @@ export class ApiController {
   }
 
   @Get('/unique/:id')
-  async getPropertyById(@Param() params: { id: string }) {
+  async getPropertyById(
+    @Param() params: { id: string },
+  ): Promise<Property & { Media: Media[] }> {
     const property = await this.prismaService.property.findFirstOrThrow({
       where: {
         mlsId: params.id,
@@ -142,7 +146,15 @@ export class ApiController {
       },
     });
 
-    return property;
+    return {
+      ...property,
+      Media: (property.images as PropertyImage[]).map((m) => ({
+        id: m.url,
+        order: m.order,
+        url: m.url,
+        propertyId: property.id,
+      })),
+    };
   }
 
   @Get('/search')
@@ -167,9 +179,6 @@ export class ApiController {
           },
         ],
       },
-      include: {
-        Media: true,
-      },
       take: parseInt(params.limit as unknown as string),
     });
 
@@ -180,7 +189,11 @@ export class ApiController {
       cp: p.pc,
       listingPrice: p.price,
       isLease: p.isForSale,
-      image: p.Media.length ? p.Media[0]?.url : '',
+      image: this.getDefaultImage(p),
     }));
+  }
+
+  private getDefaultImage(p: Property) {
+    return Array.isArray(p.images) ? (p.images[0] as any)?.url : '';
   }
 }
