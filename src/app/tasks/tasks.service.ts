@@ -38,42 +38,6 @@ export class TasksService {
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
-  async migrateImagesCron() {
-    const limit = 200;
-
-    let imagesMigrated = 0;
-    let propertiesMigrated = 0;
-
-    try {
-      console.log('\n');
-
-      console.time('migrate-images-cron-job');
-      this.logger.log('Migrate images cron job started');
-
-      for (let i = 0; i < limit; i++) {
-        const { imagesMigrated: a, propertiesMigrated: b } =
-          await this.migrateMediaFromMediaToPropertyTable();
-
-        imagesMigrated += a;
-        propertiesMigrated += b;
-        console.log('Iteration: ', i + 1);
-      }
-
-      this.logger.log(
-        `Migrated ${imagesMigrated} images from media to property table`,
-      );
-      this.logger.log(`Migrated ${propertiesMigrated} properties`);
-
-      this.logger.log('Migrate images cron job ended successfully');
-      console.timeEnd('migrate-images-cron-job');
-    } catch (error) {
-      this.logger.error('Migrate images cron job Ended with error');
-      this.logger.error(error);
-      console.timeEnd('migrate-images-cron-job');
-    }
-  }
-
   private async getInitialImport() {
     try {
       const result = await this.prisma.replication.findMany();
