@@ -141,9 +141,6 @@ export class ApiController {
       where: {
         mlsId: params.id,
       },
-      include: {
-        Media: true,
-      },
     });
 
     return {
