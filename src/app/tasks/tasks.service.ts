@@ -38,24 +38,24 @@ export class TasksService {
   //   }
   // }
 
-  // @Cron(CronExpression.EVERY_10_MINUTES)
-  // async replicationCron() {
-  //   try {
-  //     console.log('\n');
+  @Cron(CronExpression.EVERY_HOUR)
+  async replicationCron() {
+    try {
+      console.log('\n');
 
-  //     console.time('properties-cron-job');
-  //     this.logger.log('Fetching properties corn job started');
+      console.time('properties-cron-job');
+      this.logger.log('Fetching properties corn job started');
 
-  //     await this.getInitialImport();
+      await this.replication();
 
-  //     this.logger.log('Fetching properties corn job Ended successfully');
-  //     console.timeEnd('properties-cron-job');
-  //   } catch (error) {
-  //     this.logger.error('Fetching properties corn job Ended with error');
-  //     this.logger.error(error);
-  //     console.timeEnd('properties-cron-job');
-  //   }
-  // }
+      this.logger.log('Fetching properties corn job Ended successfully');
+      console.timeEnd('properties-cron-job');
+    } catch (error) {
+      this.logger.error('Fetching properties corn job Ended with error');
+      this.logger.error(error);
+      console.timeEnd('properties-cron-job');
+    }
+  }
 
   private async getInitialImport() {
     try {
@@ -226,7 +226,7 @@ export class TasksService {
 
       let currentNextLink =
         MLS_DOMAIN +
-        `/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27%20and%20${
+        `/Property?$filter=OriginatingSystemName%20eq%20%27mfrmls%27${
           lastReplicate?.lastReplicationTime ? MODIFICATION_TIMESTAMP : ''
         }&$expand=Media,Rooms,UnitTypes`;
 
@@ -423,6 +423,7 @@ export class TasksService {
     } catch (error) {
       this.logger.error(error);
       console.log(error);
+      console.log(error.response.data);
 
       this.logger.log(`Done with error`);
     }
