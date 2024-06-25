@@ -19,24 +19,43 @@ export class TasksService {
   ) {}
 
   // Run every Friday at 12am
-  @Cron(CronExpression.EVERY_HOUR)
-  async initialImportCron() {
-    try {
-      console.log('\n');
+  // @Cron(CronExpression.EVERY_HOUR)
+  // async initialImportCron() {
+  //   try {
+  //     console.log('\n');
 
-      console.time('properties-cron-job');
-      this.logger.log('Fetching properties corn job started');
+  //     console.time('properties-cron-job');
+  //     this.logger.log('Fetching properties corn job started');
 
-      await this.getInitialImport();
+  //     await this.getInitialImport();
 
-      this.logger.log('Fetching properties corn job Ended successfully');
-      console.timeEnd('properties-cron-job');
-    } catch (error) {
-      this.logger.error('Fetching properties corn job Ended with error');
-      this.logger.error(error);
-      console.timeEnd('properties-cron-job');
-    }
-  }
+  //     this.logger.log('Fetching properties corn job Ended successfully');
+  //     console.timeEnd('properties-cron-job');
+  //   } catch (error) {
+  //     this.logger.error('Fetching properties corn job Ended with error');
+  //     this.logger.error(error);
+  //     console.timeEnd('properties-cron-job');
+  //   }
+  // }
+
+  // @Cron(CronExpression.EVERY_10_MINUTES)
+  // async replicationCron() {
+  //   try {
+  //     console.log('\n');
+
+  //     console.time('properties-cron-job');
+  //     this.logger.log('Fetching properties corn job started');
+
+  //     await this.getInitialImport();
+
+  //     this.logger.log('Fetching properties corn job Ended successfully');
+  //     console.timeEnd('properties-cron-job');
+  //   } catch (error) {
+  //     this.logger.error('Fetching properties corn job Ended with error');
+  //     this.logger.error(error);
+  //     console.timeEnd('properties-cron-job');
+  //   }
+  // }
 
   private async getInitialImport() {
     try {
@@ -235,6 +254,16 @@ export class TasksService {
 
         const promises = properties.map((p) => {
           newGreatestModificationTimestamp = p.ModificationTimestamp;
+
+          const hasToRemove = p.MlgCanView === false;
+
+          if (hasToRemove) {
+            return this.prisma.property.delete({
+              where: {
+                mlsId: p.ListingKey,
+              },
+            });
+          }
 
           const promise = this.prisma.property.upsert({
             where: {
