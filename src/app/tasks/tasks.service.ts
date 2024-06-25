@@ -258,6 +258,14 @@ export class TasksService {
           const hasToRemove = p.MlgCanView === false;
 
           if (hasToRemove) {
+            const propertyToDelete = this.prisma.property.findUnique({
+              where: { mlsId: p.ListingKey },
+            });
+
+            if (!propertyToDelete) {
+              return;
+            }
+
             return this.prisma.property.delete({
               where: {
                 mlsId: p.ListingKey,
@@ -321,7 +329,7 @@ export class TasksService {
               parkingFeatures: p.ParkingFeatures ?? [],
               view: p.View ?? [],
               images: p.Media?.map((m) => ({
-                url: m.MediaURL ?? '',
+                url: this.getCloudfrontUrl(m.MediaURL) ?? '',
                 order: m.Order ?? 1,
               })),
             },
@@ -377,7 +385,7 @@ export class TasksService {
               parkingFeatures: p.ParkingFeatures ?? [],
               view: p.View ?? [],
               images: p.Media?.map((m) => ({
-                url: m.MediaURL ?? '',
+                url: this.getCloudfrontUrl(m.MediaURL) ?? '',
                 order: m.Order ?? 1,
               })),
             },
