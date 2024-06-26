@@ -62,17 +62,6 @@ model Property {
   hasPool                 Boolean   @default(false) @map("has_pool")
   contractDate            String?   @map("contract_date")
   images                  Json?
-
-  Media Media[]
-}
-
-model Media {
-  id    String @id @default(uuid())
-  url   String @default("")
-  order Int    @default(1)
-
-  property   Property @relation(fields: [propertyId], references: [id])
-  propertyId String
 }
 
 model Replication {

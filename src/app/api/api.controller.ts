@@ -4,7 +4,7 @@ import { PropertiesDto, SearchCriteriaDto } from './api.dto';
 import { MlsService } from '../mls/mls.service';
 import { ListingPropertiesResponse, PropertiesResponse } from './api.types';
 import { PrismaService } from '../persistance/prisma.service';
-import { Media, Property } from '@prisma/client';
+import { Property } from '@prisma/client';
 import { PropertyImage } from '../mls/mls.type';
 
 const RESULTS = {
@@ -134,9 +134,16 @@ export class ApiController {
   }
 
   @Get('/unique/:id')
-  async getPropertyById(
-    @Param() params: { id: string },
-  ): Promise<Property & { Media: Media[] }> {
+  async getPropertyById(@Param() params: { id: string }): Promise<
+    Property & {
+      Media: {
+        id: string;
+        order: number;
+        url: string;
+        propertyId: string;
+      }[];
+    }
+  > {
     const property = await this.prismaService.property.findFirstOrThrow({
       where: {
         mlsId: params.id,

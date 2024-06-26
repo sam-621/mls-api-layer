@@ -7,7 +7,9 @@ export const main = async () => {
   //   where: { url: { contains: 'd1w4u23c1d7gv3.cloudfront.net' } },
   // });
 
-  const lastProperties = await prisma.property.count();
+  const lastProperties = await prisma.property.findUnique({
+    where: { mlsId: 'MFR715566746' },
+  });
 
   console.log({
     lastProperties,

@@ -455,62 +455,62 @@ export class TasksService {
    *
    * 13.423s
    */
-  private async migrateMediaFromMediaToPropertyTable() {
-    const PROPERTIES_PER_PROCESS = 500;
+  // private async migrateMediaFromMediaToPropertyTable() {
+  //   const PROPERTIES_PER_PROCESS = 500;
 
-    const properties = await this.prisma.property.findMany({
-      take: PROPERTIES_PER_PROCESS,
-      where: {
-        images: {
-          equals: Prisma.DbNull,
-        },
-      },
-      include: {
-        Media: true,
-      },
-    });
+  //   const properties = await this.prisma.property.findMany({
+  //     take: PROPERTIES_PER_PROCESS,
+  //     where: {
+  //       images: {
+  //         equals: Prisma.DbNull,
+  //       },
+  //     },
+  //     include: {
+  //       Media: true,
+  //     },
+  //   });
 
-    const totalMedia = properties.reduce((acc, p) => {
-      return acc + p.Media.length;
-    }, 0);
+  //   const totalMedia = properties.reduce((acc, p) => {
+  //     return acc + p.Media.length;
+  //   }, 0);
 
-    const prismaPromises = properties.map((p) => {
-      const media = p.Media.map((m) => {
-        const newUrl = this.getCloudfrontUrl(m.url);
+  //   const prismaPromises = properties.map((p) => {
+  //     const media = p.Media.map((m) => {
+  //       const newUrl = this.getCloudfrontUrl(m.url);
 
-        return {
-          url: newUrl,
-          order: m.order,
-        };
-      }) as Prisma.JsonArray;
+  //       return {
+  //         url: newUrl,
+  //         order: m.order,
+  //       };
+  //     }) as Prisma.JsonArray;
 
-      return this.prisma.property.update({
-        where: {
-          id: p.id,
-        },
-        data: {
-          images: media,
-        },
-      });
-    });
+  //     return this.prisma.property.update({
+  //       where: {
+  //         id: p.id,
+  //       },
+  //       data: {
+  //         images: media,
+  //       },
+  //     });
+  //   });
 
-    await this.prisma.$transaction(prismaPromises);
-    await this.prisma.media.deleteMany({
-      where: {
-        propertyId: {
-          in: properties.map((p) => p.id),
-        },
-      },
-    });
+  //   await this.prisma.$transaction(prismaPromises);
+  //   await this.prisma.media.deleteMany({
+  //     where: {
+  //       propertyId: {
+  //         in: properties.map((p) => p.id),
+  //       },
+  //     },
+  //   });
 
-    console.log('Properties migrated: ', properties.length);
-    console.log('Images migrated', totalMedia);
+  //   console.log('Properties migrated: ', properties.length);
+  //   console.log('Images migrated', totalMedia);
 
-    return {
-      propertiesMigrated: properties.length,
-      imagesMigrated: totalMedia,
-    };
-  }
+  //   return {
+  //     propertiesMigrated: properties.length,
+  //     imagesMigrated: totalMedia,
+  //   };
+  // }
 
   private getCloudfrontUrl(medialUrl: string) {
     const CLOUDFRONT_DOMAIN =

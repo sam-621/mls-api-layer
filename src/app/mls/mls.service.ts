@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ListingOrder, Value } from './mls.type';
 import { PropertiesDto, SearchCriteriaDto } from '../api/api.dto';
 import { MapPropertiesResponse } from '../api/api.types';
-import { Media, Property } from '@prisma/client';
+import { Property } from '@prisma/client';
 
 @Injectable()
 export class MlsService {
