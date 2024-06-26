@@ -38,7 +38,7 @@ export class TasksService {
   //   }
   // }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async replicationCron() {
     try {
       console.log('\n');
@@ -258,15 +258,12 @@ export class TasksService {
             const propertyToDelete = await this.prisma.property.findUnique({
               where: { mlsId: p.ListingKey },
             });
+            console.log('propertyToDelete', propertyToDelete.mlsId);
 
             return Boolean(propertyToDelete);
           });
 
         const deletePromises = propertyToDelete.map((p) => {
-          console.log({
-            p,
-          });
-
           return this.prisma.property.delete({
             where: {
               mlsId: p.ListingKey,
