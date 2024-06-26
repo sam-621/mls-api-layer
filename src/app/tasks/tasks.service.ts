@@ -263,6 +263,10 @@ export class TasksService {
           });
 
         const deletePromises = propertyToDelete.map((p) => {
+          console.log({
+            p,
+          });
+
           return this.prisma.property.delete({
             where: {
               mlsId: p.ListingKey,
