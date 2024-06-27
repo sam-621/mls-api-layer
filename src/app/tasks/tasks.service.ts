@@ -37,7 +37,7 @@ export class TasksService {
   //   }
   // }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_WEEK)
   async replicationCron() {
     try {
       console.log('\n');

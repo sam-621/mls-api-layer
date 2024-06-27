@@ -85,6 +85,8 @@ export class ApiController {
       },
       take: input.zoom >= 15 ? undefined : RESULTS[input.zoom],
     });
+    const lastModificationDate =
+      await this.prismaService.replication.findFirst();
 
     if (input.order) {
       data = this.mlsService.orderBy(data, input.order);
@@ -94,6 +96,7 @@ export class ApiController {
 
     return {
       total: data.length,
+      lastModificationDate: lastModificationDate.lastReplicationTime,
       listing: data
         .slice(Number(skip), Number(skip) + Number(take))
         .map((p) => ({

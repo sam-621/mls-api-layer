@@ -1,5 +1,6 @@
 export type PropertiesResponse = {
   total: number;
+  lastModificationDate: Date;
   listing: ListingPropertiesResponse[];
   map: MapPropertiesResponse[];
 };
