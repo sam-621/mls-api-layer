@@ -37,7 +37,7 @@ export class TasksService {
   //   }
   // }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_HOUR)
   async replicationCron() {
     try {
       console.log('\n');
@@ -100,31 +100,20 @@ export class TasksService {
 
         const properties = response.data.value;
 
-        const propertyToDelete = properties
-          .filter((p) => !p.MlgCanView)
-          .filter(async (p) => {
-            const propertyToDelete = await this.prisma.property.findUnique({
-              where: { mlsId: p.ListingKey },
-            });
-            console.log('propertyToDelete', propertyToDelete?.mlsId);
+        const propertiesToDelete = properties.filter((p) => !p.MlgCanView);
 
-            return Boolean(propertyToDelete);
-          });
-
-        console.log(
-          'propertyToDelete',
-          propertyToDelete.map((p) => p.ListingKey),
-        );
-
-        const deletePromises = propertyToDelete
-          .filter((p) => p.ListingKey)
-          .map((p) => {
-            return this.prisma.property.delete({
+        for (const p of propertiesToDelete) {
+          try {
+            await this.prisma.property.delete({
               where: {
                 mlsId: p.ListingKey,
               },
             });
-          });
+            console.log('deleted property ', p.ListingKey);
+          } catch (error) {
+            console.log(error);
+          }
+        }
 
         const upsertPromises = properties
           .filter((p) => p.MlgCanView)
@@ -253,10 +242,7 @@ export class TasksService {
           });
 
         try {
-          await this.prisma.$transaction([
-            ...upsertPromises,
-            ...deletePromises,
-          ]);
+          await this.prisma.$transaction([...upsertPromises]);
         } catch (error) {
           this.logger.error(error);
         }
