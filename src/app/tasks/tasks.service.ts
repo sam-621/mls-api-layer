@@ -63,6 +63,8 @@ export class TasksService {
 
       let count = 0;
       const LIMIT = 100;
+      let propertiesSaved = 0;
+      let propertiesDeleted = 0;
 
       const MLS_DOMAIN = this.configService.get<string>('MLS_DOMAIN');
       const MODIFICATION_TIMESTAMP = lastReplicate?.lastReplicationTime
@@ -110,8 +112,9 @@ export class TasksService {
               },
             });
             console.log('deleted property ', p.ListingKey);
+            propertiesDeleted++;
           } catch (error) {
-            console.log(error);
+            // console.log(error);
           }
         }
 
@@ -243,6 +246,8 @@ export class TasksService {
 
         try {
           await this.prisma.$transaction([...upsertPromises]);
+
+          propertiesSaved += properties?.filter((p) => p?.MlgCanView)?.length;
         } catch (error) {
           this.logger.error(error);
         }
@@ -253,10 +258,8 @@ export class TasksService {
         count++;
       }
 
-      // number of request * properties per request
-      const propLength = count * 500;
-
-      this.logger.log(`Done! ${propLength} properties saved.`);
+      this.logger.log(`Done! ${propertiesSaved} properties saved/updated.`);
+      this.logger.log(`Done! ${propertiesDeleted} properties removed.`);
       let r;
 
       if (lastReplicate) {
