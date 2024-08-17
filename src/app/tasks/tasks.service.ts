@@ -37,7 +37,7 @@ export class TasksService {
   //   }
   // }
 
-  @Cron(CronExpression.EVERY_WEEK)
+  @Cron(CronExpression.EVERY_HOUR)
   async replicationCron() {
     try {
       console.log('\n');
@@ -118,12 +118,15 @@ export class TasksService {
           }
         }
 
-        const upsertPromises = properties
-          .filter((p) => p.MlgCanView)
-          .map((p) => {
+        for (const p of properties) {
+          try {
+            if (!p.MlgCanView) {
+              continue;
+            }
+
             newGreatestModificationTimestamp = p.ModificationTimestamp;
 
-            const promise = this.prisma.property.upsert({
+            await this.prisma.property.upsert({
               where: {
                 mlsId: p.ListingKey,
               },
@@ -240,17 +243,15 @@ export class TasksService {
                 })),
               },
             });
-
-            return promise;
-          });
-
-        try {
-          await this.prisma.$transaction([...upsertPromises]);
-
-          propertiesSaved += properties?.filter((p) => p?.MlgCanView)?.length;
-        } catch (error) {
-          this.logger.error(error);
+          } catch (error) {
+            this.logger.error({
+              currentProperty: p,
+              error,
+            });
+          }
         }
+
+        propertiesSaved += properties?.filter((p) => p?.MlgCanView)?.length;
 
         currentNextLink = response.data['@odata.nextLink'];
         console.log('currentNextLink', currentNextLink);
