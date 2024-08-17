@@ -137,30 +137,29 @@ export class ApiController {
   }
 
   @Get('/unique/:id')
-  async getPropertyById(@Param() params: { id: string }): Promise<
-    Property & {
-      Media: {
-        id: string;
-        order: number;
-        url: string;
-        propertyId: string;
-      }[];
-    }
-  > {
-    const property = await this.prismaService.property.findFirstOrThrow({
+  async getPropertyById(@Param() params: { id: string }) {
+    const property = await this.prismaService.property.findFirst({
       where: {
         mlsId: params.id,
       },
     });
 
+    if (!property) {
+      return {
+        data: null,
+      };
+    }
+
     return {
-      ...property,
-      Media: (property.images as PropertyImage[]).map((m) => ({
-        id: m.url,
-        order: m.order,
-        url: m.url,
-        propertyId: property.id,
-      })),
+      data: {
+        ...property,
+        Media: (property.images as PropertyImage[]).map((m) => ({
+          id: m.url,
+          order: m.order,
+          url: m.url,
+          propertyId: property.id,
+        })),
+      },
     };
   }
 
