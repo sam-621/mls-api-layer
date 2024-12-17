@@ -70,7 +70,7 @@ export class ApiController {
           lte: input.lotSize?.max ? input.lotSize.max : undefined,
         },
         status: {
-          in: input.status,
+          in: [...input.status, ''],
         },
         garageSpaces: input.garageSpaces ?? undefined,
         stories: input.stories ?? undefined,
